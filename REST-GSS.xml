@@ -15,6 +15,7 @@
   <!ENTITY rfc2119 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml'>
   <!ENTITY rfc2616 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2616.xml'>
   <!ENTITY rfc2743 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2743.xml'>
+  <!ENTITY rfc4401 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4401.xml'>
   <!ENTITY rfc4422 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4422.xml'>
   <!ENTITY rfc5056 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5056.xml'>
   <!ENTITY rfc5246 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5246.xml'>
@@ -49,9 +50,14 @@
     <abstract>
 
       <t>This document describes a method for application-layer
-        authentication in Hypertext transfer Protocol (HTTP)
-        applications using the Generic Security Services Application
-        Programming Interface (GSS-API).</t>
+        authentication in Hypertext Transfer Protocol (HTTP)
+        applications using Generic Security Services Application
+        Programming Interface (GSS-API) mechanisms via, for simplicity,
+        the Simple Authentication and Security Layers (SASL) mechanism
+        bridge known as "GS2".  This approach to authentication allows
+        for pluggability, mutual authentication, and channel binding,
+        all with no changes to HTTP nor the Transport Layer
+        Security.</t>
 
     </abstract>
 
@@ -77,8 +83,7 @@
         downsides these methods have is the lack of a secure method of
         tying all of a logged-in session's HTTP requests and responses
         to the session, with most browser-based applications using
-        "cookies", and non-browser-based applications using a single
-        HTTP/1.1 pipelined request connection instead.</t>
+        "cookies".</t>
 
       <t>We propose an alternative method of authentication that
         operates at the application layer, and which provides
@@ -90,9 +95,10 @@
         for the GSS-API <xref target='RFC2743'/>.  Channel binding <xref
           target='RFC5056'/> is used to bind authentication to TLS
         channels.  Sessions are referenced via a session URI that is
-        indicated and authenticated in all requests for a session.  This
-        method is simple, yet powerful because it is a framework for
-        application-layer authentication that is a) built on
+        indicated and authenticated in all requests for a session.</t>
+      
+      <t>This method is simple, yet powerful because it is a framework
+        for application-layer authentication that is a) built on
         off-the-shelf technologies, b) requiring no modifications to
         either HTTP nor TLS, c) that puts the application in control of
         authentication, and d) is pluggable, all the while improving
@@ -119,14 +125,16 @@
         used to initiate REST-GSS authentication.  Once the client knows
         that REST-GSS authentication is required the client begins by
         constructing an initial message as described below, then it
-        POSTs it to the agreed-upon URI.  The server will respond with
-        either an error or a 201 response.  If there is no error and
-        there is a response authentication message, it will be returned
-        to the client as the representation of the resource created and
-        named in the 201 response, otherwise, if there is no error then
-        the new resource will have no contents.  The new resource name
-        shall be the name of the REST-GSS session, known as the 'session
-        URI'.</t>
+        POSTs it to the agreed-upon URI.</t>
+      
+      <t>The server SHOULD respond to initial authentication messages
+        with either an error or a 201 response.  If there is no error
+        and there is a response authentication message, it will be
+        returned to the client as the representation of the resource
+        created and named in the 201 response, otherwise, if there is no
+        error then the new resource will have an empty representation.
+        The new resource name shall be the name of the REST-GSS session,
+        known as the 'session URI'.</t>
 
       <t>For security mechanisms that require multiple round-trips then
         additional messages from the client SHALL be POSTed to the
@@ -134,6 +142,11 @@
         returned in 200 results as the new representation of the session
         resource.</t>
 
+      <t>The server generally responds to all POSTs to the REST-GSS
+        login and session URIs with a 201 or a 200 status, respectively.
+        Failure is signalled by the authentication messages described
+        below.</t>
+      
       <t>Any GETs of a valid session URI SHALL return a representation of
         the status of that session, else the response to the GET SHALL
         be an error.</t>
@@ -143,32 +156,31 @@
       <t>The requests and responses that make up a session are tied to the
         session via the session URI, which is sent in a header.  The
         requests and responses that make up a session SHOULD be
-        authenticated by a Message Integrity Check (MIC) token taken
-        over the concatenation of: the session URI, the channel bindings
-        of the channel protecting the request (or response), and a
-        timestamp.</t>
+        authenticated by an HMAC taken over the concatenation of: the
+        session URI, the channel bindings of the channel protecting the
+        request (or response), and a timestamp.</t>
 
       <section title="Authentication Message Format">
 
-        <t>The authentication messages SHALL be formed as per the Simple
-          Authentication and Security Layer's <xref target='RFC4422'/>
-          GSS-API bridge (known as 'GS2') <xref target='RFC5801'/>.  The
-          reason for this is simple: implementors who lack a -API
-          implementation will find it simpler to implement certain
-          mechanisms if the GS2 framework is used.</t>
+        <t>The authentication messages from clients to servers SHALL be
+          formed as per the Simple Authentication and Security Layer's
+          <xref target='RFC4422'/> GSS-API bridge (known as 'GS2') <xref
+            target='RFC5801'/>.  The reason for this is simple:
+          implementors who lack a GSS-API implementation will find it
+          simpler to implement certain mechanisms if the GS2 framework
+          is used.</t>
 
-        <t>Channel binding SHOULD be used whenever the selected GSS-API
-          mechanism supports mutual authentication and channel
-          binding.</t>
+        <t>The authentication messages from servers to clients SHALL be
+          formed SASL GS2 authentication messages pre-fixed with a
+          header indicating authentication status.  The header consists
+          of a single byte, an ASCII character 'S' (success), 'F'
+          (failure), or 'C' (continue needed).</t>
 
-        <t>[A method of protecting additional, optimistic HTTP requests
-          sent before the initial security context message would be
-          nice.  The problem is we'd have to identify all such requests,
-          and the server would have to be able to track hashes of them.
-          This seems difficult.  An alternative might be to piggy-back a
-          single HTTP request in the request that carries the initial
-          security context token, but then we'd need to encode this
-          somehow.  Sounds too problematic to bother with!]</t>
+        <t>Channel binding SHOULD be used whenever a) there is a secure
+          channel (namely, TLS), and b) the selected GSS-API mechanism
+          supports mutual authentication and channel binding.</t>
+
+        <t>[Must specify authorization ID preparation...]</t>
 
       </section>
 
@@ -176,28 +188,29 @@
 
         <t>The form of the authorization ID, if any is supported, SHALL
           be specified by the application.  Most applications are
-          expected to set an empty authorization ID.</t>
+          expected to use empty authorization IDs.</t>
 
       </section>
 
-      <section title="Mechanism Negotiation">
+      <section title="Mechanism and Channel Binding Type Negotiation">
 
         <t>The representation of the resource to which initial
           authentication messages are POSTed MUST be a list of SASL/GS2
-          mechanism names separated by an ASCII comma (',').  Clients
-          MAY GET this resource in order to choose a suitable mechanism.</t>
+          mechanism names separated by an ASCII comma (','), optionally
+          followed by an ASCII newline and a comma-separated list of
+          channel binding types supported by the server.  Clients MAY
+          GET this resource in order to select a suitable mechanism.</t>
 
-      </section>
+        <t>If a channel binding type list is not advertised by the
+          server then the client SHOULD pick a channel binding type as
+          agreed a priori.  Applications must specify any pre-agreed
+          channel binding type selection criteria.</t>
 
-      <section title="Channel Binding Type Negotiation">
-
-        <t>The channel binding type MAY be selected by the server in
-          cases where the server decides that authentication is
-          required, else the channel binding type MUST either be decided
-          a priori for the application or negotiated by the application.
-          For TLS channels, the default channel binding type for
-          REST-GSS applications SHOULD be 'tls-server-end-point'
-          whenever a server certificate is used, else 'tls-unique'.</t>
+        <t>In any case of ambiguity or failure to specify, the client
+          SHOULD pick the tls-server-end-point channel binding type if
+          a server certificate was used to authenticate the server
+          end-point of the TLS channel, else the client SHOULD pick
+          tls-unique.</t>
 
       </section>
 
@@ -209,36 +222,124 @@
           indicate whether the session is fully established, a timestamp
           indicating hard expiration, a relative time specification
           indicating what the idle timer, if any, is, and, possibly, some
-          items indicating authorization attributes of the client user).</t>
+          items indicating authorization attributes of the client user
+          such as the SASL authorization ID).</t>
 
       </section>
 
-      <section title="MIC Token Input Octet String">
+      <section title="Session Binding via HMAC">
 
-        <t>[Specify in detail... -Nico]</t>
+        <t>[NOTE: Originally I meant to use GSS-API "MIC" tokens
+          instead of HMACs.  I switched to HMAC on the theory that this
+          will make it easier for some implementors.  However, using an
+          HMAC does mean doing something about hash agility -- an
+          inconvenient complication.  I'm leaving this as using an HMAC
+          for now, and we'll figure out what's the best way forward
+          later. -Nico]</t>
+
+        <t>An HMAC is used to bind HTTP requests and responses to
+          containing sessions.  A request can be bound to more than one
+          session for session combination purposes.</t>
+
+        <t>The HMAC is keyed using GSS_Pseudo_random() <xref
+            target='RFC4401'/>, which is called with the following
+          inputs to generate two HMAC keys (one for requests, one for
+          responses):
+
+          <list style='symbols'>
+
+            <t>the established security context as the 'context' input
+              argument;</t>
+
+            <t>GSS_C_PRF_KEY_FULL as the 'prf_key' input argument;</t>
+
+            <t>the string "request" or "response" as the 'prf_in' input
+              argument (not including any trailing zero bytes), for the
+              request and response keys, respectively;</t>
+
+            <t>16 as the 'desired_output_len' input argument.</t>
+
+          </list>
+
+        </t>
+
+        <t>Requests bear an HMAC, keyed with the request key, taken over
+          a minimized form of the request containing only the following
+          items:
+
+          <list style='symbols'>
+
+            <t>the request start line;</t>
+
+            <t>the Host header field, if any;</t>
+
+            <t>a Request-Date field with the same value form as the
+              'Date' field (this field MUST be sent in the request as
+              well);</t>
+
+            <t>a Request-Nanoseconds field bearing a nanoseconds
+              component of the time at which the request was made, as an
+              unsigned integer in decimal, ASCII respresentation (e.g.,
+              1234567) (this field MUST be sent in the request as well);</t>
+
+            <t>a Channel-Binding field bearing the channel bindings data
+              (base64-encoded) of the channel over which the message is
+              being sent (note: the channel bindings should be prefixed
+              with the channel binding type as described in RFC5056, and
+              prior to base64 encoding)), if there is a channel (this
+              field MUST NOT be included in the request);</t>
+
+            <t>the request body if and only if there is no channel to
+              bind to, else an empty request.</t>
+
+          </list>
+
+        </t>
+
+        <t>The request HMAC is base64-encoded, prefixed with the session
+          URI (separated by an ASCII semi-colon) and placed in a header
+          field named REST-GSS-Request-MAC.  Multiple MACs may be placed
+          in this field.</t>
+
+        <t>The HMAC hash function used SHOULD be SHA-256.</t>
+
+        <t>[Describe the same for responses.]</t>
 
       </section>
 
-    </section>
+      <section title="Server Indication of Authentication Requirement">
 
-    <section title="User Interface and JavaScript Interface Recommendations">
+        <t>When the server wishes to indicate that the client must
+          authenticate in order to access a given resource, then the
+          server MUST respond to the client's HTTP request with either a
+          redirection to a web page with a 303 redirect to a login page
+          (this in the case of browser applications) or a
+          to-be-determined 4xx error indicating that access requires
+          REST-GSS login and, optionally directing the client to the REST-GSS login
+          URI by listing that URI in a field named 'REST-GSS-Authenticate'.</t>
 
-      <t>[Add informative description of desired HTML DOM and
-        XMLHttpRequest elements. -Nico]</t>
+      </section>
 
     </section>
 
     <section title="IANA Considerations">
 
-      <t>This document has no IANA considerations [yet -- are there IANA
-        considerations regarding registration of well-known resource
-        names? -Nico].</t>
+      <t>This document has IANA considerations: new HTTP fields,
+        and, possibly, new HTTP status codes.  These need to be
+        registered.  Registration information to-be-added.</t>
 
     </section>
 
     <section title="Security Considerations">
 
       <t>[Add text...]</t>
+
+      <section title="User Interface and JavaScript Interface Recommendations">
+
+        <t>[Add informative description of desired HTML DOM and
+          XMLHttpRequest elements. -Nico]</t>
+
+      </section>
 
     </section>
 
@@ -249,6 +350,7 @@
       &rfc2119;
       &rfc2616;
       &rfc2743;
+      &rfc4401;
       &rfc4422;
       &rfc5056;
       &rfc5246;

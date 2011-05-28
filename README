@@ -4,4 +4,5 @@ This document describes a method for application-layer authentication
 in Hypertext transfer Protocol (HTTP) applications using the Generic
 Security Services Application Programming Interface (GSS-API).
 
-
+To build this Internet-Draft from the REST-GSS.xml source file use the
+'xml2rfc' program, available at http://xml.resource.org/ .

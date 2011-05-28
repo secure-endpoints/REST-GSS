@@ -1,0 +1,504 @@
+
+
+
+NETWORK WORKING GROUP                                        N. Williams
+Internet-Draft                                              Cryptonector
+Intended status: Standards Track                            May 27, 2011
+Expires: November 28, 2011
+
+
+  RESTful Hypertext Transfer Protocol Application-Layer Authentication
+                    Using Generic Security Services
+                       draft-williams-rest-gss-00
+
+Abstract
+
+   This document describes a method for application-layer authentication
+   in Hypertext Transfer Protocol (HTTP) applications using Generic
+   Security Services Application Programming Interface (GSS-API)
+   mechanisms via, for simplicity, the Simple Authentication and
+   Security Layers (SASL) mechanism bridge known as "GS2".  This
+   approach to authentication allows for pluggability, mutual
+   authentication, and channel binding, all with no changes to HTTP nor
+   the Transport Layer Security.
+
+Status of this Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on November 28, 2011.
+
+Copyright Notice
+
+   Copyright (c) 2011 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+
+
+
+Williams                Expires November 28, 2011               [Page 1]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+   This document may contain material from IETF Documents or IETF
+   Contributions published or made publicly available before November
+   10, 2008.  The person(s) controlling the copyright in some of this
+   material may not have granted the IETF Trust the right to allow
+   modifications of such material outside the IETF Standards Process.
+   Without obtaining an adequate license from the person(s) controlling
+   the copyright in such materials, this document may not be modified
+   outside the IETF Standards Process, and derivative works of it may
+   not be created outside the IETF Standards Process, except to format
+   it for publication as an RFC or to translate it into languages other
+   than English.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Williams                Expires November 28, 2011               [Page 2]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+Table of Contents
+
+   1.    Introduction  . . . . . . . . . . . . . . . . . . . . . . . . 4
+   1.1.  Conventions used in this document . . . . . . . . . . . . . . 4
+   2.    The Protocol  . . . . . . . . . . . . . . . . . . . . . . . . 4
+   2.1.  Authentication Message Format . . . . . . . . . . . . . . . . 5
+   2.2.  Authorization ID Form . . . . . . . . . . . . . . . . . . . . 6
+   2.3.  Mechanism and Channel Binding Type Negotiation  . . . . . . . 6
+   2.4.  Session Status Representation . . . . . . . . . . . . . . . . 6
+   2.5.  Session Binding via HMAC  . . . . . . . . . . . . . . . . . . 6
+   2.6.  Server Indication of Authentication Requirement . . . . . . . 8
+   3.    IANA Considerations . . . . . . . . . . . . . . . . . . . . . 8
+   4.    Security Considerations . . . . . . . . . . . . . . . . . . . 8
+   4.1.  User Interface and JavaScript Interface Recommendations . . . 8
+   5.    References  . . . . . . . . . . . . . . . . . . . . . . . . . 8
+   5.1.  Normative References  . . . . . . . . . . . . . . . . . . . . 8
+   5.2.  Informative References  . . . . . . . . . . . . . . . . . . . 9
+         Author's Address  . . . . . . . . . . . . . . . . . . . . . . 9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Williams                Expires November 28, 2011               [Page 3]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+1.  Introduction
+
+   Hypertext transfer Protocol (HTTP) [RFC2616] applications often
+   require authentication and related security services.  These
+   applications have a plethora of odd choices for authentication, such
+   as: Transport Layer Security (TLS) [RFC5246] with pre-shared secret
+   keys (PSK), TLS with user certificates [RFC5280], HTTP Basic, HTTP
+   Digest, and HTTP/Negotiate authentication, posting of HTML forms with
+   usernames and passwords filled in, and various methods based on
+   passing tokens via HTTP URIs, such as OAuth and OpenID [add
+   references].  All these methods of authentication leave something to
+   be desired.  Worse, these methods of authentication operate at
+   various different network layers, making abstraction particularly
+   difficult, if not impossible.  Among the many downsides these methods
+   have is the lack of a secure method of tying all of a logged-in
+   session's HTTP requests and responses to the session, with most
+   browser-based applications using "cookies".
+
+   We propose an alternative method of authentication that operates at
+   the application layer, and which provides applications with access to
+   a large number of actual security mechanisms.  This method is based
+   on an exchange of authentication messages via HTTP POST to either a
+   well-known URI or to a URI indicated by the server or agreed a
+   priori.  These authentication messages are mostly those of mechanisms
+   defined for the GSS-API [RFC2743].  Channel binding [RFC5056] is used
+   to bind authentication to TLS channels.  Sessions are referenced via
+   a session URI that is indicated and authenticated in all requests for
+   a session.
+
+   This method is simple, yet powerful because it is a framework for
+   application-layer authentication that is a) built on off-the-shelf
+   technologies, b) requiring no modifications to either HTTP nor TLS,
+   c) that puts the application in control of authentication, and d) is
+   pluggable, all the while improving security for HTTP applications
+   whenever GSS mechanisms are used that provide mutual authentication.
+
+1.1.  Conventions used in this document
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119] .
+
+
+2.  The Protocol
+
+   At some point the client application determines that REST-GSS
+   authentication is required.  How the client does this is discussed in
+   a sub-section below, but for the purposes of this discussion, the
+
+
+
+Williams                Expires November 28, 2011               [Page 4]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+   client MUST learn or know a URI that will be used to initiate REST-
+   GSS authentication.  Once the client knows that REST-GSS
+   authentication is required the client begins by constructing an
+   initial message as described below, then it POSTs it to the agreed-
+   upon URI.
+
+   The server SHOULD respond to initial authentication messages with
+   either an error or a 201 response.  If there is no error and there is
+   a response authentication message, it will be returned to the client
+   as the representation of the resource created and named in the 201
+   response, otherwise, if there is no error then the new resource will
+   have an empty representation.  The new resource name shall be the
+   name of the REST-GSS session, known as the 'session URI'.
+
+   For security mechanisms that require multiple round-trips then
+   additional messages from the client SHALL be POSTed to the session
+   URI, and any response messages from the server will be returned in
+   200 results as the new representation of the session resource.
+
+   The server generally responds to all POSTs to the REST-GSS login and
+   session URIs with a 201 or a 200 status, respectively.  Failure is
+   signalled by the authentication messages described below.
+
+   Any GETs of a valid session URI SHALL return a representation of the
+   status of that session, else the response to the GET SHALL be an
+   error.
+
+   A DELETE of the session URI logs the session out.
+
+   The requests and responses that make up a session are tied to the
+   session via the session URI, which is sent in a header.  The requests
+   and responses that make up a session SHOULD be authenticated by an
+   HMAC taken over the concatenation of: the session URI, the channel
+   bindings of the channel protecting the request (or response), and a
+   timestamp.
+
+2.1.  Authentication Message Format
+
+   The authentication messages from clients to servers SHALL be formed
+   as per the Simple Authentication and Security Layer's [RFC4422] GSS-
+   API bridge (known as 'GS2') [RFC5801].  The reason for this is
+   simple: implementors who lack a GSS-API implementation will find it
+   simpler to implement certain mechanisms if the GS2 framework is used.
+
+   The authentication messages from servers to clients SHALL be formed
+   SASL GS2 authentication messages pre-fixed with a header indicating
+   authentication status.  The header consists of a single byte, an
+   ASCII character 'S' (success), 'F' (failure), or 'C' (continue
+
+
+
+Williams                Expires November 28, 2011               [Page 5]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+   needed).
+
+   Channel binding SHOULD be used whenever a) there is a secure channel
+   (namely, TLS), and b) the selected GSS-API mechanism supports mutual
+   authentication and channel binding.
+
+   [Must specify authorization ID preparation...]
+
+2.2.  Authorization ID Form
+
+   The form of the authorization ID, if any is supported, SHALL be
+   specified by the application.  Most applications are expected to use
+   empty authorization IDs.
+
+2.3.  Mechanism and Channel Binding Type Negotiation
+
+   The representation of the resource to which initial authentication
+   messages are POSTed MUST be a list of SASL/GS2 mechanism names
+   separated by an ASCII comma (','), optionally followed by an ASCII
+   newline and a comma-separated list of channel binding types supported
+   by the server.  Clients MAY GET this resource in order to select a
+   suitable mechanism.
+
+   If a channel binding type list is not advertised by the server then
+   the client SHOULD pick a channel binding type as agreed a priori.
+   Applications must specify any pre-agreed channel binding type
+   selection criteria.
+
+   In any case of ambiguity or failure to specify, the client SHOULD
+   pick the tls-server-end-point channel binding type if a server
+   certificate was used to authenticate the server end-point of the TLS
+   channel, else the client SHOULD pick tls-unique.
+
+2.4.  Session Status Representation
+
+   The status of a session SHALL be obtained by GETting the session
+   resource.  The status of a session SHALL consist of: <TBD> (in
+   particular we should have a boolean to indicate whether the session
+   is fully established, a timestamp indicating hard expiration, a
+   relative time specification indicating what the idle timer, if any,
+   is, and, possibly, some items indicating authorization attributes of
+   the client user such as the SASL authorization ID).
+
+2.5.  Session Binding via HMAC
+
+   [NOTE: Originally I meant to use GSS-API "MIC" tokens instead of
+   HMACs.  I switched to HMAC on the theory that this will make it
+   easier for some implementors.  However, using an HMAC does mean doing
+
+
+
+Williams                Expires November 28, 2011               [Page 6]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+   something about hash agility -- an inconvenient complication.  I'm
+   leaving this as using an HMAC for now, and we'll figure out what's
+   the best way forward later. -Nico]
+
+   An HMAC is used to bind HTTP requests and responses to containing
+   sessions.  A request can be bound to more than one session for
+   session combination purposes.
+
+   The HMAC is keyed using GSS_Pseudo_random() [RFC4401], which is
+   called with the following inputs to generate two HMAC keys (one for
+   requests, one for responses):
+
+   o  the established security context as the 'context' input argument;
+
+   o  GSS_C_PRF_KEY_FULL as the 'prf_key' input argument;
+
+   o  the string "request" or "response" as the 'prf_in' input argument
+      (not including any trailing zero bytes), for the request and
+      response keys, respectively;
+
+   o  16 as the 'desired_output_len' input argument.
+
+   Requests bear an HMAC, keyed with the request key, taken over a
+   minimized form of the request containing only the following items:
+
+   o  the request start line;
+
+   o  the Host header field, if any;
+
+   o  a Request-Date field with the same value form as the 'Date' field
+      (this field MUST be sent in the request as well);
+
+   o  a Request-Nanoseconds field bearing a nanoseconds component of the
+      time at which the request was made, as an unsigned integer in
+      decimal, ASCII respresentation (e.g., 1234567) (this field MUST be
+      sent in the request as well);
+
+   o  a Channel-Binding field bearing the channel bindings data (base64-
+      encoded) of the channel over which the message is being sent
+      (note: the channel bindings should be prefixed with the channel
+      binding type as described in RFC5056, and prior to base64
+      encoding)), if there is a channel (this field MUST NOT be included
+      in the request);
+
+   o  the request body if and only if there is no channel to bind to,
+      else an empty request.
+
+   The request HMAC is base64-encoded, prefixed with the session URI
+
+
+
+Williams                Expires November 28, 2011               [Page 7]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+   (separated by an ASCII semi-colon) and placed in a header field named
+   REST-GSS-Request-MAC.  Multiple MACs may be placed in this field.
+
+   The HMAC hash function used SHOULD be SHA-256.
+
+   [Describe the same for responses.]
+
+2.6.  Server Indication of Authentication Requirement
+
+   When the server wishes to indicate that the client must authenticate
+   in order to access a given resource, then the server MUST respond to
+   the client's HTTP request with either a redirection to a web page
+   with a 303 redirect to a login page (this in the case of browser
+   applications) or a to-be-determined 4xx error indicating that access
+   requires REST-GSS login and, optionally directing the client to the
+   REST-GSS login URI by listing that URI in a field named 'REST-GSS-
+   Authenticate'.
+
+
+3.  IANA Considerations
+
+   This document has IANA considerations: new HTTP fields, and,
+   possibly, new HTTP status codes.  These need to be registered.
+   Registration information to-be-added.
+
+
+4.  Security Considerations
+
+   [Add text...]
+
+4.1.  User Interface and JavaScript Interface Recommendations
+
+   [Add informative description of desired HTML DOM and XMLHttpRequest
+   elements. -Nico]
+
+
+5.  References
+
+5.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC2616]  Fielding, R., Gettys, J., Mogul, J., Frystyk, H.,
+              Masinter, L., Leach, P., and T. Berners-Lee, "Hypertext
+              Transfer Protocol -- HTTP/1.1", RFC 2616, June 1999.
+
+   [RFC2743]  Linn, J., "Generic Security Service Application Program
+
+
+
+Williams                Expires November 28, 2011               [Page 8]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+              Interface Version 2, Update 1", RFC 2743, January 2000.
+
+   [RFC4401]  Williams, N., "A Pseudo-Random Function (PRF) API
+              Extension for the Generic Security Service Application
+              Program Interface (GSS-API)", RFC 4401, February 2006.
+
+   [RFC4422]  Melnikov, A. and K. Zeilenga, "Simple Authentication and
+              Security Layer (SASL)", RFC 4422, June 2006.
+
+   [RFC5056]  Williams, N., "On the Use of Channel Bindings to Secure
+              Channels", RFC 5056, November 2007.
+
+   [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
+              (TLS) Protocol Version 1.2", RFC 5246, August 2008.
+
+   [RFC5587]  Williams, N., "Extended Generic Security Service Mechanism
+              Inquiry APIs", RFC 5587, July 2009.
+
+   [RFC5801]  Josefsson, S. and N. Williams, "Using Generic Security
+              Service Application Program Interface (GSS-API) Mechanisms
+              in Simple Authentication and Security Layer (SASL): The
+              GS2 Mechanism Family", RFC 5801, July 2010.
+
+   [RFC5929]  Altman, J., Williams, N., and L. Zhu, "Channel Bindings
+              for TLS", RFC 5929, July 2010.
+
+5.2.  Informative References
+
+   [RFC4121]  Zhu, L., Jaganathan, K., and S. Hartman, "The Kerberos
+              Version 5 Generic Security Service Application Program
+              Interface (GSS-API) Mechanism: Version 2", RFC 4121,
+              July 2005.
+
+   [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
+              Housley, R., and W. Polk, "Internet X.509 Public Key
+              Infrastructure Certificate and Certificate Revocation List
+              (CRL) Profile", RFC 5280, May 2008.
+
+
+Author's Address
+
+   Nicolas Williams
+   Cryptonector LLC
+
+   Email: nico@cryptonector.com
+
+
+
+
+
+
+Williams                Expires November 28, 2011               [Page 9]
+
