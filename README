@@ -1,0 +1,7 @@
+RESTful Hypertext Transfer Protocol Application-Layer Authentication Using Generic Security Services
+
+This document describes a method for application-layer authentication
+in Hypertext transfer Protocol (HTTP) applications using the Generic
+Security Services Application Programming Interface (GSS-API).
+
+

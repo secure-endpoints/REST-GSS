@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes" ?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<?rfc tocindent="no" ?>
+<?rfc autobreaks="no" ?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes"?>
+<?rfc iprnotified="no" ?>
+<?rfc strict="yes" ?>
+
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+  <!ENTITY rfc2119 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml'>
+  <!ENTITY rfc2616 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2616.xml'>
+  <!ENTITY rfc2743 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2743.xml'>
+  <!ENTITY rfc4422 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4422.xml'>
+  <!ENTITY rfc5056 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5056.xml'>
+  <!ENTITY rfc5246 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5246.xml'>
+  <!ENTITY rfc5587 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5587.xml'>
+  <!ENTITY rfc5801 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5801.xml'>
+  <!ENTITY rfc5929 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5929.xml'>
+  <!ENTITY rfc4121 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4121.xml'>
+  <!ENTITY rfc5280 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5280.xml'>
+]>
+
+
+<rfc category="std" docName="draft-williams-rest-gss-00" ipr="pre5378Trust200902">
+  <front>
+    <title abbrev="REST-GSS">RESTful Hypertext Transfer Protocol Application-Layer Authentication Using Generic Security Services</title>
+
+    <author fullname="Nicolas Williams" initials="N." surname="Williams">
+      <organization abbrev="Cryptonector">Cryptonector LLC</organization>
+
+      <address>
+        <email>nico@cryptonector.com</email>
+      </address>
+    </author>
+
+    <date day="27" month="May" year="2011" />
+
+    <area>Security</area>
+
+    <workgroup>NETWORK WORKING GROUP</workgroup>
+
+    <keyword>Internet-Draft</keyword>
+
+    <abstract>
+
+      <t>This document describes a method for application-layer
+        authentication in Hypertext transfer Protocol (HTTP)
+        applications using the Generic Security Services Application
+        Programming Interface (GSS-API).</t>
+
+    </abstract>
+
+  </front>
+
+  <middle>
+
+    <section title="Introduction">
+
+      <t>Hypertext transfer Protocol (HTTP) <xref target='RFC2616'/>
+        applications often require authentication and related security
+        services.  These applications have a plethora of odd choices for
+        authentication, such as: Transport Layer Security (TLS) <xref
+          target='RFC5246'/> with pre-shared secret keys (PSK), TLS with
+        user certificates <xref target='RFC5280'/>, HTTP Basic, HTTP
+        Digest, and HTTP/Negotiate authentication, posting of HTML forms
+        with usernames and passwords filled in, and various methods
+        based on passing tokens via HTTP URIs, such as OAuth and OpenID
+        [add references].  All these methods of authentication leave
+        something to be desired.  Worse, these methods of authentication
+        operate at various different network layers, making abstraction
+        particularly difficult, if not impossible.  Among the many
+        downsides these methods have is the lack of a secure method of
+        tying all of a logged-in session's HTTP requests and responses
+        to the session, with most browser-based applications using
+        "cookies", and non-browser-based applications using a single
+        HTTP/1.1 pipelined request connection instead.</t>
+
+      <t>We propose an alternative method of authentication that
+        operates at the application layer, and which provides
+        applications with access to a large number of actual security
+        mechanisms.  This method is based on an exchange of
+        authentication messages via HTTP POST to either a well-known URI
+        or to a URI indicated by the server or agreed a priori.  These
+        authentication messages are mostly those of mechanisms defined
+        for the GSS-API <xref target='RFC2743'/>.  Channel binding <xref
+          target='RFC5056'/> is used to bind authentication to TLS
+        channels.  Sessions are referenced via a session URI that is
+        indicated and authenticated in all requests for a session.  This
+        method is simple, yet powerful because it is a framework for
+        application-layer authentication that is a) built on
+        off-the-shelf technologies, b) requiring no modifications to
+        either HTTP nor TLS, c) that puts the application in control of
+        authentication, and d) is pluggable, all the while improving
+        security for HTTP applications whenever GSS mechanisms are used
+        that provide mutual authentication.</t>
+
+      <section title="Conventions used in this document">
+
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+          "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+          document are to be interpreted as described in <xref
+            target="RFC2119"></xref> .</t>
+
+      </section>
+
+    </section>
+
+    <section title="The Protocol">
+
+      <t>At some point the client application determines that REST-GSS
+        authentication is required.  How the client does this is
+        discussed in a sub-section below, but for the purposes of this
+        discussion, the client MUST learn or know a URI that will be
+        used to initiate REST-GSS authentication.  Once the client knows
+        that REST-GSS authentication is required the client begins by
+        constructing an initial message as described below, then it
+        POSTs it to the agreed-upon URI.  The server will respond with
+        either an error or a 201 response.  If there is no error and
+        there is a response authentication message, it will be returned
+        to the client as the representation of the resource created and
+        named in the 201 response, otherwise, if there is no error then
+        the new resource will have no contents.  The new resource name
+        shall be the name of the REST-GSS session, known as the 'session
+        URI'.</t>
+
+      <t>For security mechanisms that require multiple round-trips then
+        additional messages from the client SHALL be POSTed to the
+        session URI, and any response messages from the server will be
+        returned in 200 results as the new representation of the session
+        resource.</t>
+
+      <t>Any GETs of a valid session URI SHALL return a representation of
+        the status of that session, else the response to the GET SHALL
+        be an error.</t>
+
+      <t>A DELETE of the session URI logs the session out.</t>
+
+      <t>The requests and responses that make up a session are tied to the
+        session via the session URI, which is sent in a header.  The
+        requests and responses that make up a session SHOULD be
+        authenticated by a Message Integrity Check (MIC) token taken
+        over the concatenation of: the session URI, the channel bindings
+        of the channel protecting the request (or response), and a
+        timestamp.</t>
+
+      <section title="Authentication Message Format">
+
+        <t>The authentication messages SHALL be formed as per the Simple
+          Authentication and Security Layer's <xref target='RFC4422'/>
+          GSS-API bridge (known as 'GS2') <xref target='RFC5801'/>.  The
+          reason for this is simple: implementors who lack a -API
+          implementation will find it simpler to implement certain
+          mechanisms if the GS2 framework is used.</t>
+
+        <t>Channel binding SHOULD be used whenever the selected GSS-API
+          mechanism supports mutual authentication and channel
+          binding.</t>
+
+        <t>[A method of protecting additional, optimistic HTTP requests
+          sent before the initial security context message would be
+          nice.  The problem is we'd have to identify all such requests,
+          and the server would have to be able to track hashes of them.
+          This seems difficult.  An alternative might be to piggy-back a
+          single HTTP request in the request that carries the initial
+          security context token, but then we'd need to encode this
+          somehow.  Sounds too problematic to bother with!]</t>
+
+      </section>
+
+      <section title="Authorization ID Form">
+
+        <t>The form of the authorization ID, if any is supported, SHALL
+          be specified by the application.  Most applications are
+          expected to set an empty authorization ID.</t>
+
+      </section>
+
+      <section title="Mechanism Negotiation">
+
+        <t>The representation of the resource to which initial
+          authentication messages are POSTed MUST be a list of SASL/GS2
+          mechanism names separated by an ASCII comma (',').  Clients
+          MAY GET this resource in order to choose a suitable mechanism.</t>
+
+      </section>
+
+      <section title="Channel Binding Type Negotiation">
+
+        <t>The channel binding type MAY be selected by the server in
+          cases where the server decides that authentication is
+          required, else the channel binding type MUST either be decided
+          a priori for the application or negotiated by the application.
+          For TLS channels, the default channel binding type for
+          REST-GSS applications SHOULD be 'tls-server-end-point'
+          whenever a server certificate is used, else 'tls-unique'.</t>
+
+      </section>
+
+      <section title="Session Status Representation">
+
+        <t>The status of a session SHALL be obtained by GETting the
+          session resource.  The status of a session SHALL consist of:
+          &lt;TBD&gt; (in particular we should have a boolean to
+          indicate whether the session is fully established, a timestamp
+          indicating hard expiration, a relative time specification
+          indicating what the idle timer, if any, is, and, possibly, some
+          items indicating authorization attributes of the client user).</t>
+
+      </section>
+
+      <section title="MIC Token Input Octet String">
+
+        <t>[Specify in detail... -Nico]</t>
+
+      </section>
+
+    </section>
+
+    <section title="User Interface and JavaScript Interface Recommendations">
+
+      <t>[Add informative description of desired HTML DOM and
+        XMLHttpRequest elements. -Nico]</t>
+
+    </section>
+
+    <section title="IANA Considerations">
+
+      <t>This document has no IANA considerations [yet -- are there IANA
+        considerations regarding registration of well-known resource
+        names? -Nico].</t>
+
+    </section>
+
+    <section title="Security Considerations">
+
+      <t>[Add text...]</t>
+
+    </section>
+
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      &rfc2119;
+      &rfc2616;
+      &rfc2743;
+      &rfc4422;
+      &rfc5056;
+      &rfc5246;
+      &rfc5587;
+      &rfc5801;
+      &rfc5929;
+    </references>
+
+    <references title="Informative References">
+      &rfc4121;
+      &rfc5280;
+    </references>
+  </back>
+</rfc>
