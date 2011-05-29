@@ -5,4 +5,7 @@ in Hypertext transfer Protocol (HTTP) applications using the Generic
 Security Services Application Programming Interface (GSS-API).
 
 To build this Internet-Draft from the REST-GSS.xml source file use the
-'xml2rfc' program, available at http://xml.resource.org/ .
+'xml2rfc' program, available at http://xml.resource.org/ , as follows:
+
+% xml2rfc REST-GSS.xml REST-GSS.html
+% xml2rfc REST-GSS.xml REST-GSS.txt 
