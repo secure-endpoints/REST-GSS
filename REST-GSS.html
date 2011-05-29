@@ -159,7 +159,7 @@
         bridge known as "GS2".  This approach to authentication allows
         for pluggability, mutual authentication, and channel binding,
         all with no changes to HTTP nor the Transport Layer
-        Security.
+        Security (TLS).
 </p>
 <h3>Status of this Memo</h3>
 <p>
@@ -210,38 +210,42 @@ than English.</p>
 <a href="#anchor1">1.</a>&nbsp;
 Introduction<br />
 <a href="#anchor2">1.1.</a>&nbsp;
+On Application-Layer Authentication Services<br />
+<a href="#anchor3">1.2.</a>&nbsp;
 Conventions used in this document<br />
-<a href="#anchor3">2.</a>&nbsp;
+<a href="#anchor4">2.</a>&nbsp;
 The Protocol<br />
-<a href="#anchor4">2.1.</a>&nbsp;
+<a href="#anchor5">2.1.</a>&nbsp;
 Authentication Message Format<br />
-<a href="#anchor5">2.2.</a>&nbsp;
+<a href="#anchor6">2.2.</a>&nbsp;
 Authentication State Cookies<br />
-<a href="#anchor6">2.3.</a>&nbsp;
+<a href="#anchor7">2.3.</a>&nbsp;
 Target Service Naming<br />
-<a href="#anchor7">2.4.</a>&nbsp;
+<a href="#anchor8">2.4.</a>&nbsp;
 Authorization ID Form<br />
-<a href="#anchor8">2.5.</a>&nbsp;
+<a href="#anchor9">2.5.</a>&nbsp;
 Mechanism, Channel Binding Type, and Other Negotiation<br />
-<a href="#anchor9">2.6.</a>&nbsp;
+<a href="#anchor10">2.6.</a>&nbsp;
 Session Status Representation<br />
-<a href="#anchor10">2.7.</a>&nbsp;
+<a href="#anchor11">2.7.</a>&nbsp;
 Session Binding via MIC Tokens<br />
-<a href="#anchor11">2.8.</a>&nbsp;
+<a href="#anchor12">2.8.</a>&nbsp;
+Alternative Session Binding Options<br />
+<a href="#anchor13">2.9.</a>&nbsp;
 Server Indication of Authentication Requirement<br />
-<a href="#anchor12">3.</a>&nbsp;
+<a href="#anchor14">3.</a>&nbsp;
 Examples<br />
-<a href="#anchor13">3.1.</a>&nbsp;
+<a href="#anchor15">3.1.</a>&nbsp;
 Server Decides When to Authenticate<br />
-<a href="#anchor14">3.2.</a>&nbsp;
+<a href="#anchor16">3.2.</a>&nbsp;
 Mechanism and Other Negotiation<br />
-<a href="#anchor15">3.3.</a>&nbsp;
+<a href="#anchor17">3.3.</a>&nbsp;
 Login, Session, and Logout, with SCRAM<br />
-<a href="#anchor16">4.</a>&nbsp;
+<a href="#anchor18">4.</a>&nbsp;
 IANA Considerations<br />
-<a href="#anchor17">5.</a>&nbsp;
+<a href="#anchor19">5.</a>&nbsp;
 Security Considerations<br />
-<a href="#anchor18">5.1.</a>&nbsp;
+<a href="#anchor20">5.1.</a>&nbsp;
 User Interface and Scripting Interface Recommendations<br />
 <a href="#rfc.references1">6.</a>&nbsp;
 References<br />
@@ -262,16 +266,19 @@ Introduction</h3>
 <p>Hypertext transfer Protocol (HTTP) <a class='info' href='#RFC2616'>[RFC2616]<span> (</span><span class='info'>Fielding, R., Gettys, J., Mogul, J., Frystyk, H., Masinter, L., Leach, P., and T. Berners-Lee, &ldquo;Hypertext Transfer Protocol -- HTTP/1.1,&rdquo; June&nbsp;1999.</span><span>)</span></a>
         applications often require authentication and related security
         services.  These applications have a plethora of odd choices for
-        authentication, such as: Transport Layer Security (TLS) <a class='info' href='#RFC5246'>[RFC5246]<span> (</span><span class='info'>Dierks, T. and E. Rescorla, &ldquo;The Transport Layer Security (TLS) Protocol Version 1.2,&rdquo; August&nbsp;2008.</span><span>)</span></a> with pre-shared secret keys (PSK), TLS with
-        user certificates <a class='info' href='#RFC5280'>[RFC5280]<span> (</span><span class='info'>Cooper, D., Santesson, S., Farrell, S., Boeyen, S., Housley, R., and W. Polk, &ldquo;Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile,&rdquo; May&nbsp;2008.</span><span>)</span></a>, HTTP Basic, HTTP
-        Digest, and HTTP/Negotiate authentication, posting of HTML forms
+        authentication functioning at various different network layers.
+        For example: Transport Layer Security (TLS) <a class='info' href='#RFC5246'>[RFC5246]<span> (</span><span class='info'>Dierks, T. and E. Rescorla, &ldquo;The Transport Layer Security (TLS) Protocol Version 1.2,&rdquo; August&nbsp;2008.</span><span>)</span></a> with pre-shared secret keys (PSK), TLS with
+        user certificates <a class='info' href='#RFC5280'>[RFC5280]<span> (</span><span class='info'>Cooper, D., Santesson, S., Farrell, S., Boeyen, S., Housley, R., and W. Polk, &ldquo;Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile,&rdquo; May&nbsp;2008.</span><span>)</span></a>, HTTP Basic and
+        Digest authentication, HTTP/Negotiate, posting of HTML forms
         with usernames and passwords filled in, and various methods
-        based on passing tokens via HTTP URIs, such as OAuth and OpenID
-        [add references].  All these methods of authentication leave
-        something to be desired.  Worse, these methods of authentication
-        operate at various different network layers, making abstraction
-        particularly difficult, if not impossible.  Among the many
-        downsides these methods have is the lack of a secure method of
+        based on passing tokens via HTTP redirection, such as OAuth and
+        OpenID [add references].
+</p>
+<p>All the authentication methods currently available to HTTP
+        applications leave something to be desired.  For example these
+        authentication methods operate at various different network
+        layers, making abstraction of security services particularly
+        difficult.  Another problem is the lack of a secure method of
         tying all of a logged-in session's HTTP requests and responses
         to the session, with most browser-based applications using
         "cookies".
@@ -287,8 +294,7 @@ Introduction</h3>
         channels.  Sessions are referenced via a session URI that is
         indicated and authenticated in all requests for a session.
 </p>
-<p>This method is simple, yet powerful because it is a framework
-        for application-layer authentication that is a) built on
+<p>The appeal of this solution is that a) it is build on
         off-the-shelf technologies, b) requiring no modifications to
         either HTTP nor TLS, c) that puts the application in control of
         authentication, and d) is pluggable, all the while improving
@@ -305,13 +311,41 @@ Introduction</h3>
 <a name="anchor2"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.1.1"></a><h3>1.1.&nbsp;
+On Application-Layer Authentication Services</h3>
+
+<p>The application layer is generally the most convenient for
+          running authentication services that applications require.  On
+          the other hand, lower network layers have usually been more
+          convenient for implementing transport security.  As a result
+          many existing Internet applications provide for both, but
+          historically with no binding between authentication and
+          transport security, and often providing two transport security
+          options: one at the application layer, and one below.  [Add a
+          list of representative SASL and GSS-API apps and references,
+          such as IMAP, POP3, SMTP/SUBMIT, LDAP, DNS (GSS-TSIG), FTP,
+          SSHv2, etcetera].
+</p>
+<p>The main disadvantage of application-layer authentication has
+          been that until recently many applications had to provide
+          options for two different "security layers": TLS (below the
+          application layer) and SASL (at the application layer), and
+          sometimes both might be used at the same time without any
+          binding between them.  The advent of standards for channel
+          binding <a class='info' href='#RFC5056'>[RFC5056]<span> (</span><span class='info'>Williams, N., &ldquo;On the Use of Channel Bindings to Secure Channels,&rdquo; November&nbsp;2007.</span><span>)</span></a> <a class='info' href='#RFC5929'>[RFC5929]<span> (</span><span class='info'>Altman, J., Williams, N., and L. Zhu, &ldquo;Channel Bindings for TLS,&rdquo; July&nbsp;2010.</span><span>)</span></a>
+          makes the combination of application-layer authentication with
+          transport security at lower layers realistic.  Therefore we
+          may now consider solutions that we might once not have.
+</p>
+<a name="anchor3"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.1.2"></a><h3>1.2.&nbsp;
 Conventions used in this document</h3>
 
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
           "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
           document are to be interpreted as described in <a class='info' href='#RFC2119'>[RFC2119]<span> (</span><span class='info'>Bradner, S., &ldquo;Key words for use in RFCs to Indicate Requirement Levels,&rdquo; March&nbsp;1997.</span><span>)</span></a> .
 </p>
-<a name="anchor3"></a><br /><hr />
+<a name="anchor4"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2"></a><h3>2.&nbsp;
 The Protocol</h3>
@@ -358,7 +392,7 @@ The Protocol</h3>
         over inputs such that the request or response is bound to the
         session.
 </p>
-<a name="anchor4"></a><br /><hr />
+<a name="anchor5"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.1"></a><h3>2.1.&nbsp;
 Authentication Message Format</h3>
@@ -381,7 +415,7 @@ Authentication Message Format</h3>
           channel (namely, TLS), and b) the selected GSS-API mechanism
           supports mutual authentication and channel binding.
 </p>
-<a name="anchor5"></a><br /><hr />
+<a name="anchor6"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.2"></a><h3>2.2.&nbsp;
 Authentication State Cookies</h3>
@@ -422,7 +456,7 @@ Authentication State Cookies</h3>
           then they must route all subsequent authentication messages
           through that process.
 </p>
-<a name="anchor6"></a><br /><hr />
+<a name="anchor7"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.3"></a><h3>2.3.&nbsp;
 Target Service Naming</h3>
@@ -440,7 +474,7 @@ Target Service Naming</h3>
           site without having to login to each of many services hosted
           by different hosts in the same domain. -Nico]
 </p>
-<a name="anchor7"></a><br /><hr />
+<a name="anchor8"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.4"></a><h3>2.4.&nbsp;
 Authorization ID Form</h3>
@@ -454,7 +488,7 @@ Authorization ID Form</h3>
           feature should specify a method of preparing the
           authorization ID, such as SASLprep <a class='info' href='#RFC4013'>[RFC4013]<span> (</span><span class='info'>Zeilenga, K., &ldquo;SASLprep: Stringprep Profile for User Names and Passwords,&rdquo; February&nbsp;2005.</span><span>)</span></a>.
 </p>
-<a name="anchor8"></a><br /><hr />
+<a name="anchor9"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.5"></a><h3>2.5.&nbsp;
 Mechanism, Channel Binding Type, and Other Negotiation</h3>
@@ -507,7 +541,7 @@ Mechanism, Channel Binding Type, and Other Negotiation</h3>
           authenticate the server end-point of the TLS channel, else the
           client SHOULD pick tls-unique.
 </p>
-<a name="anchor9"></a><br /><hr />
+<a name="anchor10"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.6"></a><h3>2.6.&nbsp;
 Session Status Representation</h3>
@@ -543,7 +577,7 @@ Session Status Representation</h3>
 
         
 </p>
-<a name="anchor10"></a><br /><hr />
+<a name="anchor11"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.7"></a><h3>2.7.&nbsp;
 Session Binding via MIC Tokens</h3>
@@ -634,9 +668,23 @@ Session Binding via MIC Tokens</h3>
 <p>These MIC tokens are validated by calling GSS_Verify_MIC()
           with the same input data as GSS_Get_MIC().
 </p>
-<a name="anchor11"></a><br /><hr />
+<a name="anchor12"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.8"></a><h3>2.8.&nbsp;
+Alternative Session Binding Options</h3>
+
+<p>[Add text describing the use of cookies instead of MIC
+          tokens.]
+</p>
+<p>[Add text describing a method of associating REST-GSS session
+          URIs with TLS session IDs instead of using MIC tokens on every
+          request/response.  This is only workable when the client's and
+          server's HTTP/TLS stacks expose enough information to the
+          application.]
+</p>
+<a name="anchor13"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.2.9"></a><h3>2.9.&nbsp;
 Server Indication of Authentication Requirement</h3>
 
 <p>When the server wishes to indicate that the client must
@@ -649,33 +697,94 @@ Server Indication of Authentication Requirement</h3>
           by listing that URI in a response header field named
           'REST-GSS-Authenticate'.
 </p>
-<a name="anchor12"></a><br /><hr />
+<a name="anchor14"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.3"></a><h3>3.&nbsp;
 Examples</h3>
 
-<a name="anchor13"></a><br /><hr />
+<a name="anchor15"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.3.1"></a><h3>3.1.&nbsp;
 Server Decides When to Authenticate</h3>
+<br /><hr class="insert" />
+<div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
+   C-&gt;S: HTTP/1.1 GET /some/resource
+         Host: A.example
 
-<p>...
-</p>
-<a name="anchor14"></a><br /><hr />
+   S-&gt;C: HTTP/1.1 303 http://A.example/login.html&amp;&lt;encoded-URI&gt;
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Authentication required indication browser apps&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+<br /><hr class="insert" />
+<div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
+   C-&gt;S: HTTP/1.1 GET /some/resource
+         Host: A.example
+
+   S-&gt;C: HTTP/1.1 4xx
+         REST-GSS-URI: http://A.example/rest-gss-login
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Authentication required indication for non-browser apps&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+
+<a name="anchor16"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.3.2"></a><h3>3.2.&nbsp;
 Mechanism and Other Negotiation</h3>
+<br /><hr class="insert" />
+<div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
+   C-&gt;S: HTTP/1.1 GET /rest-gss-login
+         Host: A.example
 
-<p>...
-</p>
-<a name="anchor15"></a><br /><hr />
+   S-&gt;C: HTTP/1.1 200
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         mechs: SCRAM-SHA-1-PLUS,GSS-KRB5-PLUS
+         channel-binding-types: tls-server-end-point
+         session-binding: MIC-CB, MIC-body
+         replay-protection: optional
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Negotiation&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+
+<a name="anchor17"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.3.3"></a><h3>3.3.&nbsp;
 Login, Session, and Logout, with SCRAM</h3>
 
-<p>...
-</p>
-<a name="anchor16"></a><br /><hr />
+<p>The following example is shamefully stolen from RFC5802, and
+          adapted to REST-GSS.
+</p><br /><hr class="insert" />
+<div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
+   C-&gt;S: HTTP/1.1 POST /rest-gss-login
+         Host: A.example
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         SCRAM-SHA-1
+         n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL
+
+   S-&gt;C: HTTP/1.1 201
+         Location http://A.example/rest-gss-session-9d0af5f680d4ff46
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         C
+         r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,
+         s=QSXCR+Q6sek8bf92,i=4096
+
+   C-&gt;S: HTTP/1.1 POST /rest-gss-session-9d0af5f680d4ff46
+         Host: A.example
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         c=biws,r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,
+         p=v0X8v3Bz2T0CJGbJQyF0X+HI4Ts=
+
+   S-&gt;C: HTTP/1.1 200
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         A
+         v=rmF9pqV8S7suAoZWja4dJRkFsKQ=
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Authentication message exchange using SCRAM
+          without channel bdingin&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+
+<a name="anchor18"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.4"></a><h3>4.&nbsp;
 IANA Considerations</h3>
@@ -684,7 +793,7 @@ IANA Considerations</h3>
         and, possibly, new HTTP status codes.  These need to be
         registered.  Registration information to-be-added.
 </p>
-<a name="anchor17"></a><br /><hr />
+<a name="anchor19"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.5"></a><h3>5.&nbsp;
 Security Considerations</h3>
@@ -740,9 +849,14 @@ Security Considerations</h3>
         inquiry API <a class='info' href='#RFC5587'>[RFC5587]<span> (</span><span class='info'>Williams, N., &ldquo;Extended Generic Security Service Mechanism Inquiry APIs,&rdquo; July&nbsp;2009.</span><span>)</span></a> to help select mechanisms
         that provide the features required by the application.
 </p>
+<p>While it is convenient to have servers decide when
+        authentication is required on the basis of the URIs being
+        accessed by the client, this can leak information.  It is best
+        to require authentication, or not, for an entire site.
+</p>
 <p>...
 </p>
-<a name="anchor18"></a><br /><hr />
+<a name="anchor20"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.5.1"></a><h3>5.1.&nbsp;
 User Interface and Scripting Interface Recommendations</h3>

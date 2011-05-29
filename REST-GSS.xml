@@ -65,7 +65,7 @@
         bridge known as "GS2".  This approach to authentication allows
         for pluggability, mutual authentication, and channel binding,
         all with no changes to HTTP nor the Transport Layer
-        Security.</t>
+        Security (TLS).</t>
 
     </abstract>
 
@@ -78,17 +78,20 @@
       <t>Hypertext transfer Protocol (HTTP) <xref target='RFC2616'/>
         applications often require authentication and related security
         services.  These applications have a plethora of odd choices for
-        authentication, such as: Transport Layer Security (TLS) <xref
+        authentication functioning at various different network layers.
+        For example: Transport Layer Security (TLS) <xref
           target='RFC5246'/> with pre-shared secret keys (PSK), TLS with
-        user certificates <xref target='RFC5280'/>, HTTP Basic, HTTP
-        Digest, and HTTP/Negotiate authentication, posting of HTML forms
+        user certificates <xref target='RFC5280'/>, HTTP Basic and
+        Digest authentication, HTTP/Negotiate, posting of HTML forms
         with usernames and passwords filled in, and various methods
-        based on passing tokens via HTTP URIs, such as OAuth and OpenID
-        [add references].  All these methods of authentication leave
-        something to be desired.  Worse, these methods of authentication
-        operate at various different network layers, making abstraction
-        particularly difficult, if not impossible.  Among the many
-        downsides these methods have is the lack of a secure method of
+        based on passing tokens via HTTP redirection, such as OAuth and
+        OpenID [add references].</t>
+      
+      <t>All the authentication methods currently available to HTTP
+        applications leave something to be desired.  For example these
+        authentication methods operate at various different network
+        layers, making abstraction of security services particularly
+        difficult.  Another problem is the lack of a secure method of
         tying all of a logged-in session's HTTP requests and responses
         to the session, with most browser-based applications using
         "cookies".</t>
@@ -105,8 +108,7 @@
         channels.  Sessions are referenced via a session URI that is
         indicated and authenticated in all requests for a session.</t>
 
-      <t>This method is simple, yet powerful because it is a framework
-        for application-layer authentication that is a) built on
+      <t>The appeal of this solution is that a) it is build on
         off-the-shelf technologies, b) requiring no modifications to
         either HTTP nor TLS, c) that puts the application in control of
         authentication, and d) is pluggable, all the while improving
@@ -124,6 +126,33 @@
             target='I-D.ietf-abfab-gss-eap'/>, as well as various legacy
           mechanisms such as NTLM [add reference] and a Diffie-Hellman
           mechanism [add reference].</t>
+
+      <section title="On Application-Layer Authentication Services">
+
+        <t>The application layer is generally the most convenient for
+          running authentication services that applications require.  On
+          the other hand, lower network layers have usually been more
+          convenient for implementing transport security.  As a result
+          many existing Internet applications provide for both, but
+          historically with no binding between authentication and
+          transport security, and often providing two transport security
+          options: one at the application layer, and one below.  [Add a
+          list of representative SASL and GSS-API apps and references,
+          such as IMAP, POP3, SMTP/SUBMIT, LDAP, DNS (GSS-TSIG), FTP,
+          SSHv2, etcetera].</t>
+
+        <t>The main disadvantage of application-layer authentication has
+          been that until recently many applications had to provide
+          options for two different "security layers": TLS (below the
+          application layer) and SASL (at the application layer), and
+          sometimes both might be used at the same time without any
+          binding between them.  The advent of standards for channel
+          binding <xref target='RFC5056'/> <xref target='RFC5929'/>
+          makes the combination of application-layer authentication with
+          transport security at lower layers realistic.  Therefore we
+          may now consider solutions that we might once not have.</t>
+
+      </section>
 
       <section title="Conventions used in this document">
 
@@ -451,6 +480,19 @@
 
       </section>
 
+      <section title="Alternative Session Binding Options">
+
+        <t>[Add text describing the use of cookies instead of MIC
+          tokens.]</t>
+
+        <t>[Add text describing a method of associating REST-GSS session
+          URIs with TLS session IDs instead of using MIC tokens on every
+          request/response.  This is only workable when the client's and
+          server's HTTP/TLS stacks expose enough information to the
+          application.]</t>
+
+      </section>
+
       <section title="Server Indication of Authentication Requirement">
 
         <t>When the server wishes to indicate that the client must
@@ -471,19 +513,88 @@
 
       <section title="Server Decides When to Authenticate">
 
-        <t>...</t>
+        <figure title='Authentication required indication browser apps'>
+          <artwork><![CDATA[
+   C->S: HTTP/1.1 GET /some/resource
+         Host: A.example
+
+   S->C: HTTP/1.1 303 http://A.example/login.html&<encoded-URI>
+            ]]></artwork>
+        </figure>
+
+        <figure title='Authentication required indication for non-browser apps'>
+          <artwork><![CDATA[
+   C->S: HTTP/1.1 GET /some/resource
+         Host: A.example
+
+   S->C: HTTP/1.1 4xx
+         REST-GSS-URI: http://A.example/rest-gss-login
+            ]]></artwork>
+        </figure>
 
       </section>
 
       <section title="Mechanism and Other Negotiation">
 
-        <t>...</t>
+        <figure title='Negotiation'>
+          <artwork><![CDATA[
+   C->S: HTTP/1.1 GET /rest-gss-login
+         Host: A.example
+
+   S->C: HTTP/1.1 200
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         mechs: SCRAM-SHA-1-PLUS,GSS-KRB5-PLUS
+         channel-binding-types: tls-server-end-point
+         session-binding: MIC-CB, MIC-body
+         replay-protection: optional
+            ]]></artwork>
+        </figure>
 
       </section>
 
       <section title="Login, Session, and Logout, with SCRAM">
 
-        <t>...</t>
+        <t>The following example is shamefully stolen from RFC5802, and
+          adapted to REST-GSS.</t>
+
+        <figure title='Authentication message exchange using SCRAM
+          without channel bdingin'>
+          <artwork><![CDATA[
+   C->S: HTTP/1.1 POST /rest-gss-login
+         Host: A.example
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         SCRAM-SHA-1
+         n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL
+
+   S->C: HTTP/1.1 201
+         Location http://A.example/rest-gss-session-9d0af5f680d4ff46
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         C
+         r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,
+         s=QSXCR+Q6sek8bf92,i=4096
+
+   C->S: HTTP/1.1 POST /rest-gss-session-9d0af5f680d4ff46
+         Host: A.example
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         c=biws,r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,
+         p=v0X8v3Bz2T0CJGbJQyF0X+HI4Ts=
+
+   S->C: HTTP/1.1 200
+         Content-Type: application/rest-gss-login
+         Content-Length: nnn
+
+         A
+         v=rmF9pqV8S7suAoZWja4dJRkFsKQ=
+            ]]></artwork>
+        </figure>
 
       </section>
 
@@ -550,6 +661,11 @@
       <t>REST-GSS applications SHOULD use the extended GSS mechanism
         inquiry API <xref target='RFC5587'/> to help select mechanisms
         that provide the features required by the application.</t>
+
+      <t>While it is convenient to have servers decide when
+        authentication is required on the basis of the URIs being
+        accessed by the client, this can leak information.  It is best
+        to require authentication, or not, for an entire site.</t>
 
       <t>...</t>
 
