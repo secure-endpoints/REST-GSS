@@ -67,6 +67,11 @@
         all with no changes to HTTP nor the Transport Layer
         Security (TLS).</t>
 
+      <t>We hope that the use of mutual authentication and channel
+        binding at the application layer will make phishing more
+        difficult.  We hope that the use of authentication at the
+        application layer will make REST-GSS deployable.</t>
+
     </abstract>
 
   </front>
@@ -560,7 +565,7 @@
           adapted to REST-GSS.</t>
 
         <figure title='Authentication message exchange using SCRAM
-          without channel bdingin'>
+          without channel binding'>
           <artwork><![CDATA[
    C->S: HTTP/1.1 POST /rest-gss-login
          Host: A.example
@@ -596,6 +601,85 @@
             ]]></artwork>
         </figure>
 
+        <figure title='Example request and response using MIC tokens'>
+          <artwork><![CDATA[
+   C->S: HTTP/1.1 GET /some/doc.html
+         Host: A.example
+         REST-GSS-Request-MIC:
+            http://A.example/rest-gss-session-9d0af5f680d4ff46
+            <base64-encoding of output of GSS_Get_MIC() using the
+             named session's security context and taken over a
+             minimal version of this request:
+
+             HTTP/1.1 GET /some/doc.html
+             Host: A.example
+
+             >
+
+   S->C: HTTP/1.1 200
+         Content-Type: text/html
+         Content-Length: nnn
+
+         <HTML source of http://A.example/some/doc.html>
+            ]]></artwork>
+        </figure>
+
+      </section>
+
+    </section>
+
+    <section title="Implementation and Deployment Considerations">
+
+      <t>It is possible to implement REST-GSS with no changes to HTTP
+        implementations, on the client and server sides both.
+        [Hmmm, maybe we should make sure not to add any new return
+        codes! -Nico].  It is also possible to implement REST-GSS with
+        no changes to TLS implementations, though it is preferable to
+        use TLS implementations that output channel bindings data <xref
+          target='RFC5929'/>.</t>
+
+      <t>All that is required in order to implement REST-GSS is one or
+        more GSS-API security mechanisms, whether used directly or via
+        an actual GSS-API framework implementation.  Note that an
+        implementation of the full GSS-API framework is <spanx
+          style='emph'>not</spanx> required.  A minimal implementation
+        of a security mechanism such as SCRAM <xref target='RFC5802'/>
+        is feasible that provides nothing like the API that is the
+        GSS-API.</t>
+
+      <t>Similarly, a GS2 <xref target='RFC5801'/> implementation is
+        required, but given how simple GS2 is there's no need for a
+        full-blown SASL <xref target='RFC4422'/> nor GS2 framework
+        implementation.</t>
+
+      <t>The largest obstacle for REST-GSS implementation lies in the
+        web browser, in the case of browser-based applications: without
+        a native implementation of REST-GSS in the browser (or the
+        platform, but accessed via the browser), the only way to
+        implement REST-GSS is by implementing a security mechanism
+        JavaScript [XXX Add reference. -Nico].  Implementing security
+        mechanisms in scripts downloaded as needed from the same origin
+        as the page that will use them presents a number of obvious
+        security considerations, but as a technology demonstrator, this
+        approach will work.</t>
+
+      <t>As for deployment, the availability of security mechanisms and
+        federations is critical.  Work is in progress to produce
+        federatable security mechanisms for the GSS-API.  In the
+        meantime, there are security mechanisms such as Kerberos V5
+        <xref target='RFC4121'/> and others, that make deployment in the
+        enterprise scale, if not the Internet scale, an immediately
+        available option.</t>
+
+      <section title="Desired GSS-API Extensions">
+
+        <t>At least one GSS-API extension is desired, though not required:
+          the ability to export (serialize) partially-established security
+          contexts.  It is possible to implement REST-GSS on the server
+          without this feature, but especially for clustered servers using
+          multi-round-trip security mechanisms, it would be much easier to
+          implement where this extension is available.</t>
+
       </section>
 
     </section>
@@ -610,39 +694,53 @@
 
     <section title="Security Considerations">
 
-      <t>[Add text...]</t>
-
-      <t>The security considerations of the GSS-API <xref
+      <t>The security considerations of HTTP <xref target='RFC2616'/>,
+        TLS <xref target='RFC5246'/>, the GSS-API <xref
           target='RFC2743'/>, SASL <xref target='RFC4422'/>, and GS2
-        <xref target='RFC5801'/> apply.</t>
+        <xref target='RFC5801'/> apply.  When channel binding is used
+        the security considerations of <xref target='RFC5056'/> and
+        <xref target='RFC5929'/> also apply.  Some of the security
+        considerations of HTTP and TLS are addressed by the use of
+        mutual authentication and channel binding in REST-GSS.</t>
 
       <t>REST-GSS provide a number of optional facilities, both by
-        itself and through the security mechanisms.  These facilities
-        can provide excellent security to users and service
-        providers, particularly mutual authentication and channel
-        binding, which can strengthen the authentication of services
-        otherwise provided only by TLS.</t>
+        itself and because the GSS-API itself provides optional
+        facilities.  These facilities can provide excellent security to
+        users and service providers, particularly mutual authentication
+        and channel binding, which together can significantly strengthen
+        the authentication of services otherwise provided only by
+        TLS.</t>
 
-      <t>REST-GSS applications SHOULD use TLS with confidentiality
-        protection to protect all REST-GSS authentication message
-        exchanges.</t>
+      <t>Some GSS-API security mechanisms are not secure against
+        eavesdroppers or active attacks.  Therefore REST-GSS
+        applications MUST use TLS with confidentiality protection to
+        protect all REST-GSS authentication message exchanges, and
+        SHOULD require the use of a server certificate <xref
+          target='RFC5280'/> unless mutual authentication and channel
+        binding are being used.</t>
 
       <t>REST-GSS applications SHOULD prefer security mechanisms that
         provide for mutual authentication to ones that do not, and
-        SHOULD use channel binding to TLS.  Applications that allow the
-        use of security mechanisms that do not provide mutual
-        authentication SHOULD use TLS with confidentiality protection
-        for all authentication message exchanges.</t>
+        SHOULD use channel binding to TLS whenever it's available.
+        REST-GSS applications SHOULD NOT, by default, use security
+        mechanisms that do not support mutual authentication or channel
+        binding.  REST-GSS applications that allow the use of security
+        mechanisms that do not provide mutual authentication MUST
+        require that the server be authenticated by a server certificate
+        <xref target='RFC5280'/>.</t>
 
       <t>REST-GSS applications SHOULD use channel binding to TLS, using
         the channel binding data of the TLS connection that will carry
         the client's initial authentication message.</t>
 
-      <t>REST-GSS applications MUST use TLS if confidentiality
+      <t>REST-GSS does not provide a confidentiality protection option.
+        Therefore REST-GSS applications MUST use TLS if confidentiality
         protection is desired.</t>
 
       <t>REST-GSS applications SHOULD use TLS if integrity protection is
-        desired.</t>
+        desired.  Where they do not use TLS then they SHOULD use MIC
+        tokens to protect the bodies of the requests and responses, not
+        just the HTTP method and URI.</t>
 
       <t>REST-GSS applications SHOULD use MIC tokens instead of cookies
         to tie requests to sessions.  REST-GSS applications SHOULD use
@@ -703,6 +801,20 @@
           same-origin-like constraints to the REST-GSS target service
           names, if any, specified by scripts downloaded from a
           site.</t>
+
+      </section>
+
+      <section title='Platform Integration'>
+
+        <t>[Add notes about platform integration. -Nico]</t>
+
+      </section>
+
+      <section title='Anti-Phishing'>
+
+        <t>[Add notes about how mutual authentication via federated
+          security mechanisms may reduce the scope of phishing attacks
+          by effectively adding a service whitelist of sorts. -Nico]</t>
 
       </section>
 

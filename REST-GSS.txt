@@ -22,6 +22,11 @@ Abstract
    authentication, and channel binding, all with no changes to HTTP nor
    the Transport Layer Security (TLS).
 
+   We hope that the use of mutual authentication and channel binding at
+   the application layer will make phishing more difficult.  We hope
+   that the use of authentication at the application layer will make
+   REST-GSS deployable.
+
 Status of this Memo
 
    This Internet-Draft is submitted in full conformance with the
@@ -44,11 +49,6 @@ Copyright Notice
    Copyright (c) 2011 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
-   This document is subject to BCP 78 and the IETF Trust's Legal
-   Provisions Relating to IETF Documents
-   (http://trustee.ietf.org/license-info) in effect on the date of
-   publication of this document.  Please review these documents
-   carefully, as they describe your rights and restrictions with respect
 
 
 
@@ -57,6 +57,11 @@ Williams                Expires November 28, 2011               [Page 1]
 Internet-Draft                  REST-GSS                        May 2011
 
 
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
    include Simplified BSD License text as described in Section 4.e of
    the Trust Legal Provisions and are provided without warranty as
@@ -73,11 +78,6 @@ Internet-Draft                  REST-GSS                        May 2011
    not be created outside the IETF Standards Process, except to format
    it for publication as an RFC or to translate it into languages other
    than English.
-
-
-
-
-
 
 
 
@@ -132,17 +132,17 @@ Table of Contents
    3.1.  Server Decides When to Authenticate  . . . . . . . . . . . . 11
    3.2.  Mechanism and Other Negotiation  . . . . . . . . . . . . . . 11
    3.3.  Login, Session, and Logout, with SCRAM . . . . . . . . . . . 11
-   4.    IANA Considerations  . . . . . . . . . . . . . . . . . . . . 12
-   5.    Security Considerations  . . . . . . . . . . . . . . . . . . 12
-   5.1.  User Interface and Scripting Interface Recommendations . . . 13
-   6.    References . . . . . . . . . . . . . . . . . . . . . . . . . 14
-   6.1.  Normative References . . . . . . . . . . . . . . . . . . . . 14
-   6.2.  Informative References . . . . . . . . . . . . . . . . . . . 15
-         Author's Address . . . . . . . . . . . . . . . . . . . . . . 16
-
-
-
-
+   4.    Implementation and Deployment Considerations . . . . . . . . 13
+   4.1.  Desired GSS-API Extensions . . . . . . . . . . . . . . . . . 13
+   5.    IANA Considerations  . . . . . . . . . . . . . . . . . . . . 14
+   6.    Security Considerations  . . . . . . . . . . . . . . . . . . 14
+   6.1.  User Interface and Scripting Interface Recommendations . . . 15
+   6.2.  Platform Integration . . . . . . . . . . . . . . . . . . . . 16
+   6.3.  Anti-Phishing  . . . . . . . . . . . . . . . . . . . . . . . 16
+   7.    References . . . . . . . . . . . . . . . . . . . . . . . . . 16
+   7.1.  Normative References . . . . . . . . . . . . . . . . . . . . 16
+   7.2.  Informative References . . . . . . . . . . . . . . . . . . . 17
+         Author's Address . . . . . . . . . . . . . . . . . . . . . . 18
 
 
 
@@ -642,30 +642,30 @@ Internet-Draft                  REST-GSS                        May 2011
 
    Authentication message exchange using SCRAM
           without channel
-                                  bdingin
+                                  binding
 
 
-4.  IANA Considerations
+      C->S: HTTP/1.1 GET /some/doc.html
+            Host: A.example
+            REST-GSS-Request-MIC:
+               http://A.example/rest-gss-session-9d0af5f680d4ff46
+               <base64-encoding of output of GSS_Get_MIC() using the
+                named session's security context and taken over a
+                minimal version of this request:
 
-   This document has IANA considerations: new HTTP fields, and,
-   possibly, new HTTP status codes.  These need to be registered.
-   Registration information to-be-added.
+                HTTP/1.1 GET /some/doc.html
+                Host: A.example
 
+                >
 
-5.  Security Considerations
+      S->C: HTTP/1.1 200
+            Content-Type: text/html
+            Content-Length: nnn
 
-   [Add text...]
+            <HTML source of http://A.example/some/doc.html>
 
-   The security considerations of the GSS-API [RFC2743], SASL [RFC4422],
-   and GS2 [RFC5801] apply.
+               Example request and response using MIC tokens
 
-   REST-GSS provide a number of optional facilities, both by itself and
-   through the security mechanisms.  These facilities can provide
-   excellent security to users and service providers, particularly
-   mutual authentication and channel binding, which can strengthen the
-   authentication of services otherwise provided only by TLS.
-
-   REST-GSS applications SHOULD use TLS with confidentiality protection
 
 
 
@@ -674,24 +674,119 @@ Williams                Expires November 28, 2011              [Page 12]
 Internet-Draft                  REST-GSS                        May 2011
 
 
-   to protect all REST-GSS authentication message exchanges.
+4.  Implementation and Deployment Considerations
+
+   It is possible to implement REST-GSS with no changes to HTTP
+   implementations, on the client and server sides both.  [Hmmm, maybe
+   we should make sure not to add any new return codes! -Nico].  It is
+   also possible to implement REST-GSS with no changes to TLS
+   implementations, though it is preferable to use TLS implementations
+   that output channel bindings data [RFC5929].
+
+   All that is required in order to implement REST-GSS is one or more
+   GSS-API security mechanisms, whether used directly or via an actual
+   GSS-API framework implementation.  Note that an implementation of the
+   full GSS-API framework is _not_ required.  A minimal implementation
+   of a security mechanism such as SCRAM [RFC5802] is feasible that
+   provides nothing like the API that is the GSS-API.
+
+   Similarly, a GS2 [RFC5801] implementation is required, but given how
+   simple GS2 is there's no need for a full-blown SASL [RFC4422] nor GS2
+   framework implementation.
+
+   The largest obstacle for REST-GSS implementation lies in the web
+   browser, in the case of browser-based applications: without a native
+   implementation of REST-GSS in the browser (or the platform, but
+   accessed via the browser), the only way to implement REST-GSS is by
+   implementing a security mechanism JavaScript [XXX Add reference.
+   -Nico].  Implementing security mechanisms in scripts downloaded as
+   needed from the same origin as the page that will use them presents a
+   number of obvious security considerations, but as a technology
+   demonstrator, this approach will work.
+
+   As for deployment, the availability of security mechanisms and
+   federations is critical.  Work is in progress to produce federatable
+   security mechanisms for the GSS-API.  In the meantime, there are
+   security mechanisms such as Kerberos V5 [RFC4121] and others, that
+   make deployment in the enterprise scale, if not the Internet scale,
+   an immediately available option.
+
+4.1.  Desired GSS-API Extensions
+
+   At least one GSS-API extension is desired, though not required: the
+   ability to export (serialize) partially-established security
+   contexts.  It is possible to implement REST-GSS on the server without
+   this feature, but especially for clustered servers using multi-round-
+   trip security mechanisms, it would be much easier to implement where
+   this extension is available.
+
+
+5.  IANA Considerations
+
+
+
+Williams                Expires November 28, 2011              [Page 13]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+   This document has IANA considerations: new HTTP fields, and,
+   possibly, new HTTP status codes.  These need to be registered.
+   Registration information to-be-added.
+
+
+6.  Security Considerations
+
+   The security considerations of HTTP [RFC2616], TLS [RFC5246], the
+   GSS-API [RFC2743], SASL [RFC4422], and GS2 [RFC5801] apply.  When
+   channel binding is used the security considerations of [RFC5056] and
+   [RFC5929] also apply.  Some of the security considerations of HTTP
+   and TLS are addressed by the use of mutual authentication and channel
+   binding in REST-GSS.
+
+   REST-GSS provide a number of optional facilities, both by itself and
+   because the GSS-API itself provides optional facilities.  These
+   facilities can provide excellent security to users and service
+   providers, particularly mutual authentication and channel binding,
+   which together can significantly strengthen the authentication of
+   services otherwise provided only by TLS.
+
+   Some GSS-API security mechanisms are not secure against eavesdroppers
+   or active attacks.  Therefore REST-GSS applications MUST use TLS with
+   confidentiality protection to protect all REST-GSS authentication
+   message exchanges, and SHOULD require the use of a server certificate
+   [RFC5280] unless mutual authentication and channel binding are being
+   used.
 
    REST-GSS applications SHOULD prefer security mechanisms that provide
    for mutual authentication to ones that do not, and SHOULD use channel
-   binding to TLS.  Applications that allow the use of security
-   mechanisms that do not provide mutual authentication SHOULD use TLS
-   with confidentiality protection for all authentication message
-   exchanges.
+   binding to TLS whenever it's available.  REST-GSS applications SHOULD
+   NOT, by default, use security mechanisms that do not support mutual
+   authentication or channel binding.  REST-GSS applications that allow
+   the use of security mechanisms that do not provide mutual
+   authentication MUST require that the server be authenticated by a
+   server certificate [RFC5280].
 
    REST-GSS applications SHOULD use channel binding to TLS, using the
    channel binding data of the TLS connection that will carry the
    client's initial authentication message.
 
-   REST-GSS applications MUST use TLS if confidentiality protection is
-   desired.
+   REST-GSS does not provide a confidentiality protection option.
+   Therefore REST-GSS applications MUST use TLS if confidentiality
+   protection is desired.
 
    REST-GSS applications SHOULD use TLS if integrity protection is
-   desired.
+   desired.  Where they do not use TLS then they SHOULD use MIC tokens
+   to protect the bodies of the requests and responses, not just the
+
+
+
+Williams                Expires November 28, 2011              [Page 14]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
+   HTTP method and URI.
 
    REST-GSS applications SHOULD use MIC tokens instead of cookies to tie
    requests to sessions.  REST-GSS applications SHOULD use channel
@@ -717,19 +812,11 @@ Internet-Draft                  REST-GSS                        May 2011
 
    ...
 
-5.1.  User Interface and Scripting Interface Recommendations
+6.1.  User Interface and Scripting Interface Recommendations
 
    User interface (UI) and scripting interfaces are out of scope for
    this document.  However, in the interest of seeding works-in-
    progress, we describe some such UIs and scripting APIs here, in broad
-
-
-
-Williams                Expires November 28, 2011              [Page 13]
-
-Internet-Draft                  REST-GSS                        May 2011
-
-
    strokes.
 
    For browser-based applications we recommend the addition of an
@@ -747,6 +834,14 @@ Internet-Draft                  REST-GSS                        May 2011
    authenticated client and server principal names, session protection
    options, etcetera.
 
+
+
+
+Williams                Expires November 28, 2011              [Page 15]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
    For scripting we recommend extensions to XMLHttpRequest that allows
    the application to request a REST-GSS session URI as an output,
    implying that a session will be logged in.  We also recommend inputs
@@ -758,10 +853,20 @@ Internet-Draft                  REST-GSS                        May 2011
    constraints to the REST-GSS target service names, if any, specified
    by scripts downloaded from a site.
 
+6.2.  Platform Integration
 
-6.  References
+   [Add notes about platform integration. -Nico]
 
-6.1.  Normative References
+6.3.  Anti-Phishing
+
+   [Add notes about how mutual authentication via federated security
+   mechanisms may reduce the scope of phishing attacks by effectively
+   adding a service whitelist of sorts. -Nico]
+
+
+7.  References
+
+7.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -779,18 +884,19 @@ Internet-Draft                  REST-GSS                        May 2011
    [RFC5056]  Williams, N., "On the Use of Channel Bindings to Secure
               Channels", RFC 5056, November 2007.
 
-
-
-Williams                Expires November 28, 2011              [Page 14]
-
-Internet-Draft                  REST-GSS                        May 2011
-
-
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
               (TLS) Protocol Version 1.2", RFC 5246, August 2008.
 
    [RFC5587]  Williams, N., "Extended Generic Security Service Mechanism
               Inquiry APIs", RFC 5587, July 2009.
+
+
+
+
+Williams                Expires November 28, 2011              [Page 16]
+
+Internet-Draft                  REST-GSS                        May 2011
+
 
    [RFC5801]  Josefsson, S. and N. Williams, "Using Generic Security
               Service Application Program Interface (GSS-API) Mechanisms
@@ -800,7 +906,7 @@ Internet-Draft                  REST-GSS                        May 2011
    [RFC5929]  Altman, J., Williams, N., and L. Zhu, "Channel Bindings
               for TLS", RFC 5929, July 2010.
 
-6.2.  Informative References
+7.2.  Informative References
 
    [I-D.ietf-abfab-gss-eap]
               Hartman, S. and J. Howlett, "A GSS-API Mechanism for the
@@ -834,19 +940,19 @@ Internet-Draft                  REST-GSS                        May 2011
    [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
               Housley, R., and W. Polk, "Internet X.509 Public Key
               Infrastructure Certificate and Certificate Revocation List
-
-
-
-Williams                Expires November 28, 2011              [Page 15]
-
-Internet-Draft                  REST-GSS                        May 2011
-
-
               (CRL) Profile", RFC 5280, May 2008.
 
    [RFC5802]  Newman, C., Menon-Sen, A., Melnikov, A., and N. Williams,
               "Salted Challenge Response Authentication Mechanism
               (SCRAM) SASL and GSS-API Mechanisms", RFC 5802, July 2010.
+
+
+
+
+Williams                Expires November 28, 2011              [Page 17]
+
+Internet-Draft                  REST-GSS                        May 2011
+
 
    [RFC5849]  Hammer-Lahav, E., "The OAuth 1.0 Protocol", RFC 5849,
               April 2010.
@@ -893,5 +999,11 @@ Author's Address
 
 
 
-Williams                Expires November 28, 2011              [Page 16]
+
+
+
+
+
+
+Williams                Expires November 28, 2011              [Page 18]
 

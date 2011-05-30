@@ -161,6 +161,11 @@
         all with no changes to HTTP nor the Transport Layer
         Security (TLS).
 </p>
+<p>We hope that the use of mutual authentication and channel
+        binding at the application layer will make phishing more
+        difficult.  We hope that the use of authentication at the
+        application layer will make REST-GSS deployable.
+</p>
 <h3>Status of this Memo</h3>
 <p>
 This Internet-Draft is submitted  in full
@@ -242,16 +247,24 @@ Mechanism and Other Negotiation<br />
 <a href="#anchor17">3.3.</a>&nbsp;
 Login, Session, and Logout, with SCRAM<br />
 <a href="#anchor18">4.</a>&nbsp;
+Implementation and Deployment Considerations<br />
+<a href="#anchor19">4.1.</a>&nbsp;
+Desired GSS-API Extensions<br />
+<a href="#anchor20">5.</a>&nbsp;
 IANA Considerations<br />
-<a href="#anchor19">5.</a>&nbsp;
+<a href="#anchor21">6.</a>&nbsp;
 Security Considerations<br />
-<a href="#anchor20">5.1.</a>&nbsp;
+<a href="#anchor22">6.1.</a>&nbsp;
 User Interface and Scripting Interface Recommendations<br />
-<a href="#rfc.references1">6.</a>&nbsp;
+<a href="#anchor23">6.2.</a>&nbsp;
+Platform Integration<br />
+<a href="#anchor24">6.3.</a>&nbsp;
+Anti-Phishing<br />
+<a href="#rfc.references1">7.</a>&nbsp;
 References<br />
-<a href="#rfc.references1">6.1.</a>&nbsp;
+<a href="#rfc.references1">7.1.</a>&nbsp;
 Normative References<br />
-<a href="#rfc.references2">6.2.</a>&nbsp;
+<a href="#rfc.references2">7.2.</a>&nbsp;
 Informative References<br />
 <a href="#rfc.authors">&#167;</a>&nbsp;
 Author's Address<br />
@@ -782,54 +795,144 @@ Login, Session, and Logout, with SCRAM</h3>
          A
          v=rmF9pqV8S7suAoZWja4dJRkFsKQ=
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Authentication message exchange using SCRAM
-          without channel bdingin&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+          without channel binding&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+<br /><hr class="insert" />
+<div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
+   C-&gt;S: HTTP/1.1 GET /some/doc.html
+         Host: A.example
+         REST-GSS-Request-MIC:
+            http://A.example/rest-gss-session-9d0af5f680d4ff46
+            &lt;base64-encoding of output of GSS_Get_MIC() using the named
+             session's security context and taken over a minimal version of
+             this request:
+
+             HTTP/1.1 GET /some/doc.html
+             Host: A.example
+
+             &gt;
+
+   S-&gt;C: HTTP/1.1 200
+         Content-Type: text/html
+         Content-Length: nnn
+
+         &lt;HTML source of http://A.example/some/doc.html&gt;
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Example request and response using MIC tokens&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <a name="anchor18"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.4"></a><h3>4.&nbsp;
+Implementation and Deployment Considerations</h3>
+
+<p>It is possible to implement REST-GSS with no changes to HTTP
+        implementations, on the client and server sides both.
+        [Hmmm, maybe we should make sure not to add any new return
+        codes! -Nico].  It is also possible to implement REST-GSS with
+        no changes to TLS implementations, though it is preferable to
+        use TLS implementations that output channel bindings data <a class='info' href='#RFC5929'>[RFC5929]<span> (</span><span class='info'>Altman, J., Williams, N., and L. Zhu, &ldquo;Channel Bindings for TLS,&rdquo; July&nbsp;2010.</span><span>)</span></a>.
+</p>
+<p>All that is required in order to implement REST-GSS is one or
+        more GSS-API security mechanisms, whether used directly or via
+        an actual GSS-API framework implementation.  Note that an
+        implementation of the full GSS-API framework is <em>not</em> required.  A minimal implementation
+        of a security mechanism such as SCRAM <a class='info' href='#RFC5802'>[RFC5802]<span> (</span><span class='info'>Newman, C., Menon-Sen, A., Melnikov, A., and N. Williams, &ldquo;Salted Challenge Response Authentication Mechanism (SCRAM) SASL and GSS-API Mechanisms,&rdquo; July&nbsp;2010.</span><span>)</span></a>
+        is feasible that provides nothing like the API that is the
+        GSS-API.
+</p>
+<p>Similarly, a GS2 <a class='info' href='#RFC5801'>[RFC5801]<span> (</span><span class='info'>Josefsson, S. and N. Williams, &ldquo;Using Generic Security Service Application Program Interface (GSS-API) Mechanisms in Simple Authentication and Security Layer (SASL): The GS2 Mechanism Family,&rdquo; July&nbsp;2010.</span><span>)</span></a> implementation is
+        required, but given how simple GS2 is there's no need for a
+        full-blown SASL <a class='info' href='#RFC4422'>[RFC4422]<span> (</span><span class='info'>Melnikov, A. and K. Zeilenga, &ldquo;Simple Authentication and Security Layer (SASL),&rdquo; June&nbsp;2006.</span><span>)</span></a> nor GS2 framework
+        implementation.
+</p>
+<p>The largest obstacle for REST-GSS implementation lies in the
+        web browser, in the case of browser-based applications: without
+        a native implementation of REST-GSS in the browser (or the
+        platform, but accessed via the browser), the only way to
+        implement REST-GSS is by implementing a security mechanism
+        JavaScript [XXX Add reference. -Nico].  Implementing security
+        mechanisms in scripts downloaded as needed from the same origin
+        as the page that will use them presents a number of obvious
+        security considerations, but as a technology demonstrator, this
+        approach will work.
+</p>
+<p>As for deployment, the availability of security mechanisms and
+        federations is critical.  Work is in progress to produce
+        federatable security mechanisms for the GSS-API.  In the
+        meantime, there are security mechanisms such as Kerberos V5
+        <a class='info' href='#RFC4121'>[RFC4121]<span> (</span><span class='info'>Zhu, L., Jaganathan, K., and S. Hartman, &ldquo;The Kerberos Version 5 Generic Security Service Application Program Interface (GSS-API) Mechanism: Version 2,&rdquo; July&nbsp;2005.</span><span>)</span></a> and others, that make deployment in the
+        enterprise scale, if not the Internet scale, an immediately
+        available option.
+</p>
+<a name="anchor19"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.4.1"></a><h3>4.1.&nbsp;
+Desired GSS-API Extensions</h3>
+
+<p>At least one GSS-API extension is desired, though not required:
+          the ability to export (serialize) partially-established security
+          contexts.  It is possible to implement REST-GSS on the server
+          without this feature, but especially for clustered servers using
+          multi-round-trip security mechanisms, it would be much easier to
+          implement where this extension is available.
+</p>
+<a name="anchor20"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.5"></a><h3>5.&nbsp;
 IANA Considerations</h3>
 
 <p>This document has IANA considerations: new HTTP fields,
         and, possibly, new HTTP status codes.  These need to be
         registered.  Registration information to-be-added.
 </p>
-<a name="anchor19"></a><br /><hr />
+<a name="anchor21"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.5"></a><h3>5.&nbsp;
+<a name="rfc.section.6"></a><h3>6.&nbsp;
 Security Considerations</h3>
 
-<p>[Add text...]
-</p>
-<p>The security considerations of the GSS-API <a class='info' href='#RFC2743'>[RFC2743]<span> (</span><span class='info'>Linn, J., &ldquo;Generic Security Service Application Program Interface Version 2, Update 1,&rdquo; January&nbsp;2000.</span><span>)</span></a>, SASL <a class='info' href='#RFC4422'>[RFC4422]<span> (</span><span class='info'>Melnikov, A. and K. Zeilenga, &ldquo;Simple Authentication and Security Layer (SASL),&rdquo; June&nbsp;2006.</span><span>)</span></a>, and GS2
-        <a class='info' href='#RFC5801'>[RFC5801]<span> (</span><span class='info'>Josefsson, S. and N. Williams, &ldquo;Using Generic Security Service Application Program Interface (GSS-API) Mechanisms in Simple Authentication and Security Layer (SASL): The GS2 Mechanism Family,&rdquo; July&nbsp;2010.</span><span>)</span></a> apply.
+<p>The security considerations of HTTP <a class='info' href='#RFC2616'>[RFC2616]<span> (</span><span class='info'>Fielding, R., Gettys, J., Mogul, J., Frystyk, H., Masinter, L., Leach, P., and T. Berners-Lee, &ldquo;Hypertext Transfer Protocol -- HTTP/1.1,&rdquo; June&nbsp;1999.</span><span>)</span></a>,
+        TLS <a class='info' href='#RFC5246'>[RFC5246]<span> (</span><span class='info'>Dierks, T. and E. Rescorla, &ldquo;The Transport Layer Security (TLS) Protocol Version 1.2,&rdquo; August&nbsp;2008.</span><span>)</span></a>, the GSS-API <a class='info' href='#RFC2743'>[RFC2743]<span> (</span><span class='info'>Linn, J., &ldquo;Generic Security Service Application Program Interface Version 2, Update 1,&rdquo; January&nbsp;2000.</span><span>)</span></a>, SASL <a class='info' href='#RFC4422'>[RFC4422]<span> (</span><span class='info'>Melnikov, A. and K. Zeilenga, &ldquo;Simple Authentication and Security Layer (SASL),&rdquo; June&nbsp;2006.</span><span>)</span></a>, and GS2
+        <a class='info' href='#RFC5801'>[RFC5801]<span> (</span><span class='info'>Josefsson, S. and N. Williams, &ldquo;Using Generic Security Service Application Program Interface (GSS-API) Mechanisms in Simple Authentication and Security Layer (SASL): The GS2 Mechanism Family,&rdquo; July&nbsp;2010.</span><span>)</span></a> apply.  When channel binding is used
+        the security considerations of <a class='info' href='#RFC5056'>[RFC5056]<span> (</span><span class='info'>Williams, N., &ldquo;On the Use of Channel Bindings to Secure Channels,&rdquo; November&nbsp;2007.</span><span>)</span></a> and
+        <a class='info' href='#RFC5929'>[RFC5929]<span> (</span><span class='info'>Altman, J., Williams, N., and L. Zhu, &ldquo;Channel Bindings for TLS,&rdquo; July&nbsp;2010.</span><span>)</span></a> also apply.  Some of the security
+        considerations of HTTP and TLS are addressed by the use of
+        mutual authentication and channel binding in REST-GSS.
 </p>
 <p>REST-GSS provide a number of optional facilities, both by
-        itself and through the security mechanisms.  These facilities
-        can provide excellent security to users and service
-        providers, particularly mutual authentication and channel
-        binding, which can strengthen the authentication of services
-        otherwise provided only by TLS.
+        itself and because the GSS-API itself provides optional
+        facilities.  These facilities can provide excellent security to
+        users and service providers, particularly mutual authentication
+        and channel binding, which together can significantly strengthen
+        the authentication of services otherwise provided only by
+        TLS.
 </p>
-<p>REST-GSS applications SHOULD use TLS with confidentiality
-        protection to protect all REST-GSS authentication message
-        exchanges.
+<p>Some GSS-API security mechanisms are not secure against
+        eavesdroppers or active attacks.  Therefore REST-GSS
+        applications MUST use TLS with confidentiality protection to
+        protect all REST-GSS authentication message exchanges, and
+        SHOULD require the use of a server certificate <a class='info' href='#RFC5280'>[RFC5280]<span> (</span><span class='info'>Cooper, D., Santesson, S., Farrell, S., Boeyen, S., Housley, R., and W. Polk, &ldquo;Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile,&rdquo; May&nbsp;2008.</span><span>)</span></a> unless mutual authentication and channel
+        binding are being used.
 </p>
 <p>REST-GSS applications SHOULD prefer security mechanisms that
         provide for mutual authentication to ones that do not, and
-        SHOULD use channel binding to TLS.  Applications that allow the
-        use of security mechanisms that do not provide mutual
-        authentication SHOULD use TLS with confidentiality protection
-        for all authentication message exchanges.
+        SHOULD use channel binding to TLS whenever it's available.
+        REST-GSS applications SHOULD NOT, by default, use security
+        mechanisms that do not support mutual authentication or channel
+        binding.  REST-GSS applications that allow the use of security
+        mechanisms that do not provide mutual authentication MUST
+        require that the server be authenticated by a server certificate
+        <a class='info' href='#RFC5280'>[RFC5280]<span> (</span><span class='info'>Cooper, D., Santesson, S., Farrell, S., Boeyen, S., Housley, R., and W. Polk, &ldquo;Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile,&rdquo; May&nbsp;2008.</span><span>)</span></a>.
 </p>
 <p>REST-GSS applications SHOULD use channel binding to TLS, using
         the channel binding data of the TLS connection that will carry
         the client's initial authentication message.
 </p>
-<p>REST-GSS applications MUST use TLS if confidentiality
+<p>REST-GSS does not provide a confidentiality protection option.
+        Therefore REST-GSS applications MUST use TLS if confidentiality
         protection is desired.
 </p>
 <p>REST-GSS applications SHOULD use TLS if integrity protection is
-        desired.
+        desired.  Where they do not use TLS then they SHOULD use MIC
+        tokens to protect the bodies of the requests and responses, not
+        just the HTTP method and URI.
 </p>
 <p>REST-GSS applications SHOULD use MIC tokens instead of cookies
         to tie requests to sessions.  REST-GSS applications SHOULD use
@@ -856,9 +959,9 @@ Security Considerations</h3>
 </p>
 <p>...
 </p>
-<a name="anchor20"></a><br /><hr />
+<a name="anchor22"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.5.1"></a><h3>5.1.&nbsp;
+<a name="rfc.section.6.1"></a><h3>6.1.&nbsp;
 User Interface and Scripting Interface Recommendations</h3>
 
 <p>User interface (UI) and scripting interfaces are out of scope
@@ -894,14 +997,30 @@ User Interface and Scripting Interface Recommendations</h3>
           names, if any, specified by scripts downloaded from a
           site.
 </p>
+<a name="anchor23"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.6.2"></a><h3>6.2.&nbsp;
+Platform Integration</h3>
+
+<p>[Add notes about platform integration. -Nico]
+</p>
+<a name="anchor24"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.6.3"></a><h3>6.3.&nbsp;
+Anti-Phishing</h3>
+
+<p>[Add notes about how mutual authentication via federated
+          security mechanisms may reduce the scope of phishing attacks
+          by effectively adding a service whitelist of sorts. -Nico]
+</p>
 <a name="rfc.references"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.6"></a><h3>6.&nbsp;
+<a name="rfc.section.7"></a><h3>7.&nbsp;
 References</h3>
 
 <a name="rfc.references1"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<h3>6.1.&nbsp;Normative References</h3>
+<h3>7.1.&nbsp;Normative References</h3>
 <table width="99%" border="0">
 <tr><td class="author-text" valign="top"><a name="RFC2119">[RFC2119]</a></td>
 <td class="author-text"><a href="mailto:sob@harvard.edu">Bradner, S.</a>, &ldquo;<a href="http://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>,&rdquo; BCP&nbsp;14, RFC&nbsp;2119, March&nbsp;1997 (<a href="http://www.rfc-editor.org/rfc/rfc2119.txt">TXT</a>, <a href="http://xml.resource.org/public/rfc/html/rfc2119.html">HTML</a>, <a href="http://xml.resource.org/public/rfc/xml/rfc2119.xml">XML</a>).</td></tr>
@@ -925,7 +1044,7 @@ References</h3>
 
 <a name="rfc.references2"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<h3>6.2.&nbsp;Informative References</h3>
+<h3>7.2.&nbsp;Informative References</h3>
 <table width="99%" border="0">
 <tr><td class="author-text" valign="top"><a name="I-D.ietf-abfab-gss-eap">[I-D.ietf-abfab-gss-eap]</a></td>
 <td class="author-text">Hartman, S. and J. Howlett, &ldquo;<a href="http://tools.ietf.org/html/draft-ietf-abfab-gss-eap-01">A GSS-API Mechanism for the Extensible Authentication Protocol</a>,&rdquo; draft-ietf-abfab-gss-eap-01 (work in progress), February&nbsp;2011 (<a href="http://www.ietf.org/internet-drafts/draft-ietf-abfab-gss-eap-01.txt">TXT</a>).</td></tr>
