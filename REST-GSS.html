@@ -218,47 +218,53 @@ Introduction<br />
 On Application-Layer Authentication Services<br />
 <a href="#anchor3">1.2.</a>&nbsp;
 Conventions used in this document<br />
-<a href="#anchor4">2.</a>&nbsp;
+<a href="#anchor4">1.3.</a>&nbsp;
+GSS-API and SASL Primer<br />
+<a href="#anchor5">1.4.</a>&nbsp;
+Channel Binding Primer<br />
+<a href="#anchor6">1.5.</a>&nbsp;
+Glossary<br />
+<a href="#anchor7">2.</a>&nbsp;
 The Protocol<br />
-<a href="#anchor5">2.1.</a>&nbsp;
+<a href="#anchor8">2.1.</a>&nbsp;
 Authentication Message Format<br />
-<a href="#anchor6">2.2.</a>&nbsp;
+<a href="#anchor9">2.2.</a>&nbsp;
 Authentication State Cookies<br />
-<a href="#anchor7">2.3.</a>&nbsp;
+<a href="#anchor10">2.3.</a>&nbsp;
 Target Service Naming<br />
-<a href="#anchor8">2.4.</a>&nbsp;
+<a href="#anchor11">2.4.</a>&nbsp;
 Authorization ID Form<br />
-<a href="#anchor9">2.5.</a>&nbsp;
+<a href="#anchor12">2.5.</a>&nbsp;
 Mechanism, Channel Binding Type, and Other Negotiation<br />
-<a href="#anchor10">2.6.</a>&nbsp;
+<a href="#anchor13">2.6.</a>&nbsp;
 Session Status Representation<br />
-<a href="#anchor11">2.7.</a>&nbsp;
+<a href="#anchor14">2.7.</a>&nbsp;
 Session Binding via MIC Tokens<br />
-<a href="#anchor12">2.8.</a>&nbsp;
+<a href="#anchor15">2.8.</a>&nbsp;
 Alternative Session Binding Options<br />
-<a href="#anchor13">2.9.</a>&nbsp;
+<a href="#anchor16">2.9.</a>&nbsp;
 Server Indication of Authentication Requirement<br />
-<a href="#anchor14">3.</a>&nbsp;
+<a href="#anchor17">3.</a>&nbsp;
 Examples<br />
-<a href="#anchor15">3.1.</a>&nbsp;
+<a href="#anchor18">3.1.</a>&nbsp;
 Server Decides When to Authenticate<br />
-<a href="#anchor16">3.2.</a>&nbsp;
+<a href="#anchor19">3.2.</a>&nbsp;
 Mechanism and Other Negotiation<br />
-<a href="#anchor17">3.3.</a>&nbsp;
+<a href="#anchor20">3.3.</a>&nbsp;
 Login, Session, and Logout, with SCRAM<br />
-<a href="#anchor18">4.</a>&nbsp;
+<a href="#anchor21">4.</a>&nbsp;
 Implementation and Deployment Considerations<br />
-<a href="#anchor19">4.1.</a>&nbsp;
+<a href="#anchor22">4.1.</a>&nbsp;
 Desired GSS-API Extensions<br />
-<a href="#anchor20">5.</a>&nbsp;
+<a href="#anchor23">5.</a>&nbsp;
 IANA Considerations<br />
-<a href="#anchor21">6.</a>&nbsp;
+<a href="#anchor24">6.</a>&nbsp;
 Security Considerations<br />
-<a href="#anchor22">6.1.</a>&nbsp;
+<a href="#anchor25">6.1.</a>&nbsp;
 User Interface and Scripting Interface Recommendations<br />
-<a href="#anchor23">6.2.</a>&nbsp;
+<a href="#anchor26">6.2.</a>&nbsp;
 Platform Integration<br />
-<a href="#anchor24">6.3.</a>&nbsp;
+<a href="#anchor27">6.3.</a>&nbsp;
 Anti-Phishing<br />
 <a href="#rfc.references1">7.</a>&nbsp;
 References<br />
@@ -314,12 +320,16 @@ Introduction</h3>
         security for HTTP applications whenever GSS mechanisms are used
         that provide mutual authentication.
 </p>
-<p>The GSS-API, and through the SASL/GS2 mechanism bridge, SASL,
-        enjoys a large and growing number of security mechanisms, such
-        as Kerberos V5 <a class='info' href='#RFC4121'>[RFC4121]<span> (</span><span class='info'>Zhu, L., Jaganathan, K., and S. Hartman, &ldquo;The Kerberos Version 5 Generic Security Service Application Program Interface (GSS-API) Mechanism: Version 2,&rdquo; July&nbsp;2005.</span><span>)</span></a>, SCRAM <a class='info' href='#RFC5802'>[RFC5802]<span> (</span><span class='info'>Newman, C., Menon-Sen, A., Melnikov, A., and N. Williams, &ldquo;Salted Challenge Response Authentication Mechanism (SCRAM) SASL and GSS-API Mechanisms,&rdquo; July&nbsp;2010.</span><span>)</span></a>, as well as a PKI-based mechanism [Add
+<p>The GSS-API, and through the "GS2" mechanism bridge, Simple
+        Authentication and Security Layers (SASL), enjoys a large and
+        growing number of security mechanisms, such as Kerberos V5 <a class='info' href='#RFC4121'>[RFC4121]<span> (</span><span class='info'>Zhu, L., Jaganathan, K., and S. Hartman, &ldquo;The Kerberos Version 5 Generic Security Service Application Program Interface (GSS-API) Mechanism: Version 2,&rdquo; July&nbsp;2005.</span><span>)</span></a>, SCRAM <a class='info' href='#RFC5802'>[RFC5802]<span> (</span><span class='info'>Newman, C., Menon-Sen, A., Melnikov, A., and N. Williams, &ldquo;Salted Challenge Response Authentication Mechanism (SCRAM) SASL and GSS-API Mechanisms,&rdquo; July&nbsp;2010.</span><span>)</span></a>, as well as a PKI-based mechanism [Add
         reference to PKU2U], mechanisms based on OAuth <a class='info' href='#RFC5849'>[RFC5849]<span> (</span><span class='info'>Hammer-Lahav, E., &ldquo;The OAuth 1.0 Protocol,&rdquo; April&nbsp;2010.</span><span>)</span></a>, OpenID <a class='info' href='#I-D.ietf-kitten-sasl-openid'>[I&#8209;D.ietf&#8209;kitten&#8209;sasl&#8209;openid]<span> (</span><span class='info'>Lear, E., Tschofenig, H., Mauldin, H., and S. Josefsson, &ldquo;A SASL &amp; GSS-API Mechanism for OpenID,&rdquo; April&nbsp;2011.</span><span>)</span></a>, SAML <a class='info' href='#I-D.ietf-kitten-sasl-saml'>[I&#8209;D.ietf&#8209;kitten&#8209;sasl&#8209;saml]<span> (</span><span class='info'>Wierenga, K., Lear, E., and S. Josefsson, &ldquo;A SASL and GSS-API Mechanism for SAML,&rdquo; February&nbsp;2011.</span><span>)</span></a>, and EAP <a class='info' href='#I-D.ietf-abfab-gss-eap'>[I&#8209;D.ietf&#8209;abfab&#8209;gss&#8209;eap]<span> (</span><span class='info'>Hartman, S. and J. Howlett, &ldquo;A GSS-API Mechanism for the Extensible Authentication Protocol,&rdquo; February&nbsp;2011.</span><span>)</span></a>, as well as various legacy
-          mechanisms such as NTLM [add reference] and a Diffie-Hellman
-          mechanism [add reference].
+        mechanisms such as NTLM [add reference] and a Diffie-Hellman
+        mechanism [add reference].
+</p>
+<p>Much of this document assumes some reader familiarity with the
+        GSS-API and SASL.  To aid readers new to the GSS-API we provide
+        a GSS primer section, below.
 </p>
 <a name="anchor2"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
@@ -359,6 +369,129 @@ Conventions used in this document</h3>
           document are to be interpreted as described in <a class='info' href='#RFC2119'>[RFC2119]<span> (</span><span class='info'>Bradner, S., &ldquo;Key words for use in RFCs to Indicate Requirement Levels,&rdquo; March&nbsp;1997.</span><span>)</span></a> .
 </p>
 <a name="anchor4"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.1.3"></a><h3>1.3.&nbsp;
+GSS-API and SASL Primer</h3>
+
+<p>The GSS-API and SASL are both simple security frameworks
+          providing pluggable authentication services and transport
+          protection facilities to applications.  By "pluggable" we mean
+          that multiple "security mechanisms" may be used by
+          applications without requiring different specifications for
+          how the applications use each security mechanism.  Moreover,
+          application programming interfaces (APIs) for GSS and SASL can
+          also be pluggable, requiring no changes to applications in
+          order for them to use new mechanisms.
+</p>
+<p>A "security mechanism" is an authentication protocol that
+          conforms to the requirements of the framework in which it
+          fits, and it provides the requisite authentication
+          facilities.  There are many examples of security mechanisms
+          [add some].
+</p>
+<p>The two frameworks are sufficiently similar to each other
+          that a "bridge" has been added such that all GSS mechanisms
+          may be used as SASL mechanisms as well.  This bridge is known
+          as "GS2" <a class='info' href='#RFC5801'>[RFC5801]<span> (</span><span class='info'>Josefsson, S. and N. Williams, &ldquo;Using Generic Security Service Application Program Interface (GSS-API) Mechanisms in Simple Authentication and Security Layer (SASL): The GS2 Mechanism Family,&rdquo; July&nbsp;2010.</span><span>)</span></a>.  For the remainder of this
+          section we'll describe SASL only as it works with only GS2
+          mechanisms.
+</p>
+<p>Authentication proceeds by having a client ("initiator", in
+          GSS terminology) send an initial authentication message
+          ("security context token", in GSS terminology).  The server
+          ("acceptor") consumes said token and produces one of three
+          results -success, failure, or "continue needed"-, as well as,
+          possibly, a message to return to the client.  The security
+          mechanism may require an arbitrary number of security context
+          tokens be exchanged, always in a synchronous fashion, until
+          ultimate success or failure.  Upon success the peers are said
+          to have a fully-established security context, which may then
+          be used to provide security services such as encryption.
+</p>
+<p>In SASL the server may be the one to initiate the
+          authentication message exchange, but, when using GSS mechanisms
+          via the GS2 bridge it will always be the client that initiates
+          the exchange.  SASL also requires that the application define
+          an "outcome of authentication message", which is distinct from
+          any such message that the mechanism may provide.
+</p>
+<p>Both frameworks allow mechanisms to provide facilities for
+          application data transport protection -- "security layers", in
+          SASL terminology.  SASL's security layers are stream oriented
+          (requiring ordered delivery), while GSS' are message oriented
+          (allowing out-of-order delivery), and thus the GSS-API's
+          security layers facilities are the more general ones.  The
+          GSS-API provides two methods of protecting application data:
+          "wrap tokens" and "message integrity check (MIC) tokens".
+          Wrap tokens bear application data within them, while MIC
+          tokens do not.  Thus wrap tokens may provide encryption
+          ("confidentiality protection"), while MIC tokens only provide
+          integrity protection.  MIC tokens are very similar to HMAC --
+          readers should think of HMAC output with a header affixed to
+          both, the HMAC output and the input.
+</p>
+<p>The GSS-API also provides a keyed pseudo-random function
+          (PRF) <a class='info' href='#RFC4401'>[RFC4401]<span> (</span><span class='info'>Williams, N., &ldquo;A Pseudo-Random Function (PRF) API Extension for the Generic Security Service Application Program Interface (GSS-API),&rdquo; February&nbsp;2006.</span><span>)</span></a> for keying any application's
+          non-standard security layers, if any.
+</p>
+<p>SASL application protocols almost all have an option to use
+          TLS, therefore SASL's security layers are now eschewed in
+          favor of using TLS (with channel binding -- see below).  Not
+          all GSS-API application have an option to use a separate
+          system for transport security, thus GSS applications continue
+          to use the GSS-API's transport security facilities.
+</p>
+<a name="anchor5"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.1.4"></a><h3>1.4.&nbsp;
+Channel Binding Primer</h3>
+
+<p>...
+</p>
+<a name="anchor6"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.1.5"></a><h3>1.5.&nbsp;
+Glossary</h3>
+
+<p>[Finish...]
+
+          </p>
+<blockquote class="text"><dl>
+<dt>Application protocol</dt>
+<dd>[Add definition...]
+</dd>
+<dt>Authentication</dt>
+<dd>[Add definition...]
+</dd>
+<dt>Authentication message</dt>
+<dd>[Add definition...]
+</dd>
+<dt>MIC token</dt>
+<dd>[Add definition...]
+</dd>
+<dt>Outcome of authentication message</dt>
+<dd>[Add definition...]
+</dd>
+<dt>Security mechanism</dt>
+<dd>[Add definition...]
+</dd>
+<dt>Security context</dt>
+<dd>[Add definition...]
+</dd>
+<dt>Security context token</dt>
+<dd>[Add definition...]
+</dd>
+<dt>Security context token</dt>
+<dd>[Add definition...]
+</dd>
+<dt>Wrap token</dt>
+<dd>[Add definition...]
+</dd>
+</dl></blockquote><p>
+
+        
+</p>
+<a name="anchor7"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2"></a><h3>2.&nbsp;
 The Protocol</h3>
@@ -405,30 +538,26 @@ The Protocol</h3>
         over inputs such that the request or response is bound to the
         session.
 </p>
-<a name="anchor5"></a><br /><hr />
+<a name="anchor8"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.1"></a><h3>2.1.&nbsp;
 Authentication Message Format</h3>
 
 <p>The authentication messages from clients to servers SHALL be
-          formed as per the Simple Authentication and Security Layer's
-          <a class='info' href='#RFC4422'>[RFC4422]<span> (</span><span class='info'>Melnikov, A. and K. Zeilenga, &ldquo;Simple Authentication and Security Layer (SASL),&rdquo; June&nbsp;2006.</span><span>)</span></a> GSS-API bridge (known as 'GS2') <a class='info' href='#RFC5801'>[RFC5801]<span> (</span><span class='info'>Josefsson, S. and N. Williams, &ldquo;Using Generic Security Service Application Program Interface (GSS-API) Mechanisms in Simple Authentication and Security Layer (SASL): The GS2 Mechanism Family,&rdquo; July&nbsp;2010.</span><span>)</span></a>.  The reason for this is simple:
-          implementors who lack a GSS-API implementation will find it
-          simpler to implement certain mechanisms if the GS2 framework
-          is used.
+          formed as per SASL's <a class='info' href='#RFC4422'>[RFC4422]<span> (</span><span class='info'>Melnikov, A. and K. Zeilenga, &ldquo;Simple Authentication and Security Layer (SASL),&rdquo; June&nbsp;2006.</span><span>)</span></a> GSS-API bridge
+          (known as "GS2") <a class='info' href='#RFC5801'>[RFC5801]<span> (</span><span class='info'>Josefsson, S. and N. Williams, &ldquo;Using Generic Security Service Application Program Interface (GSS-API) Mechanisms in Simple Authentication and Security Layer (SASL): The GS2 Mechanism Family,&rdquo; July&nbsp;2010.</span><span>)</span></a>.  The reason for
+          this is simple: implementors who lack a GSS-API implementation
+          will find it simpler to implement certain mechanisms if the
+          GS2 framework is used.
 </p>
 <p>The authentication messages from servers to clients SHALL be
           formed SASL GS2 authentication messages pre-fixed with a
           header indicating authentication status.  The header consists
-          of a single byte, an ASCII character 'S' (success), 'F'
+          of a single byte: an ASCII character 'S' (success), 'F'
           (failure), or 'C' (the server expects more authentication
-          messages from the client).
+          messages from the client), followed by an ASCII newline.
 </p>
-<p>Channel binding SHOULD be used whenever a) there is a secure
-          channel (namely, TLS), and b) the selected GSS-API mechanism
-          supports mutual authentication and channel binding.
-</p>
-<a name="anchor6"></a><br /><hr />
+<a name="anchor9"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.2"></a><h3>2.2.&nbsp;
 Authentication State Cookies</h3>
@@ -469,7 +598,7 @@ Authentication State Cookies</h3>
           then they must route all subsequent authentication messages
           through that process.
 </p>
-<a name="anchor7"></a><br /><hr />
+<a name="anchor10"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.3"></a><h3>2.3.&nbsp;
 Target Service Naming</h3>
@@ -487,7 +616,7 @@ Target Service Naming</h3>
           site without having to login to each of many services hosted
           by different hosts in the same domain. -Nico]
 </p>
-<a name="anchor8"></a><br /><hr />
+<a name="anchor11"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.4"></a><h3>2.4.&nbsp;
 Authorization ID Form</h3>
@@ -501,7 +630,7 @@ Authorization ID Form</h3>
           feature should specify a method of preparing the
           authorization ID, such as SASLprep <a class='info' href='#RFC4013'>[RFC4013]<span> (</span><span class='info'>Zeilenga, K., &ldquo;SASLprep: Stringprep Profile for User Names and Passwords,&rdquo; February&nbsp;2005.</span><span>)</span></a>.
 </p>
-<a name="anchor9"></a><br /><hr />
+<a name="anchor12"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.5"></a><h3>2.5.&nbsp;
 Mechanism, Channel Binding Type, and Other Negotiation</h3>
@@ -554,7 +683,7 @@ Mechanism, Channel Binding Type, and Other Negotiation</h3>
           authenticate the server end-point of the TLS channel, else the
           client SHOULD pick tls-unique.
 </p>
-<a name="anchor10"></a><br /><hr />
+<a name="anchor13"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.6"></a><h3>2.6.&nbsp;
 Session Status Representation</h3>
@@ -590,7 +719,7 @@ Session Status Representation</h3>
 
         
 </p>
-<a name="anchor11"></a><br /><hr />
+<a name="anchor14"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.7"></a><h3>2.7.&nbsp;
 Session Binding via MIC Tokens</h3>
@@ -681,7 +810,7 @@ Session Binding via MIC Tokens</h3>
 <p>These MIC tokens are validated by calling GSS_Verify_MIC()
           with the same input data as GSS_Get_MIC().
 </p>
-<a name="anchor12"></a><br /><hr />
+<a name="anchor15"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.8"></a><h3>2.8.&nbsp;
 Alternative Session Binding Options</h3>
@@ -695,7 +824,7 @@ Alternative Session Binding Options</h3>
           server's HTTP/TLS stacks expose enough information to the
           application.]
 </p>
-<a name="anchor13"></a><br /><hr />
+<a name="anchor16"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.2.9"></a><h3>2.9.&nbsp;
 Server Indication of Authentication Requirement</h3>
@@ -710,12 +839,12 @@ Server Indication of Authentication Requirement</h3>
           by listing that URI in a response header field named
           'REST-GSS-Authenticate'.
 </p>
-<a name="anchor14"></a><br /><hr />
+<a name="anchor17"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.3"></a><h3>3.&nbsp;
 Examples</h3>
 
-<a name="anchor15"></a><br /><hr />
+<a name="anchor18"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.3.1"></a><h3>3.1.&nbsp;
 Server Decides When to Authenticate</h3>
@@ -735,7 +864,7 @@ Server Decides When to Authenticate</h3>
          REST-GSS-URI: http://A.example/rest-gss-login
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Authentication required indication for non-browser apps&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
-<a name="anchor16"></a><br /><hr />
+<a name="anchor19"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.3.2"></a><h3>3.2.&nbsp;
 Mechanism and Other Negotiation</h3>
@@ -754,7 +883,7 @@ Mechanism and Other Negotiation</h3>
          replay-protection: optional
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Negotiation&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
-<a name="anchor17"></a><br /><hr />
+<a name="anchor20"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.3.3"></a><h3>3.3.&nbsp;
 Login, Session, and Logout, with SCRAM</h3>
@@ -802,9 +931,9 @@ Login, Session, and Logout, with SCRAM</h3>
          Host: A.example
          REST-GSS-Request-MIC:
             http://A.example/rest-gss-session-9d0af5f680d4ff46
-            &lt;base64-encoding of output of GSS_Get_MIC() using the named
-             session's security context and taken over a minimal version of
-             this request:
+            &lt;base64-encoding of output of GSS_Get_MIC() using the
+             named session's security context and taken over a
+             minimal version of this request:
 
              HTTP/1.1 GET /some/doc.html
              Host: A.example
@@ -818,7 +947,7 @@ Login, Session, and Logout, with SCRAM</h3>
          &lt;HTML source of http://A.example/some/doc.html&gt;
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Example request and response using MIC tokens&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
-<a name="anchor18"></a><br /><hr />
+<a name="anchor21"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.4"></a><h3>4.&nbsp;
 Implementation and Deployment Considerations</h3>
@@ -862,7 +991,7 @@ Implementation and Deployment Considerations</h3>
         enterprise scale, if not the Internet scale, an immediately
         available option.
 </p>
-<a name="anchor19"></a><br /><hr />
+<a name="anchor22"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.4.1"></a><h3>4.1.&nbsp;
 Desired GSS-API Extensions</h3>
@@ -874,7 +1003,7 @@ Desired GSS-API Extensions</h3>
           multi-round-trip security mechanisms, it would be much easier to
           implement where this extension is available.
 </p>
-<a name="anchor20"></a><br /><hr />
+<a name="anchor23"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.5"></a><h3>5.&nbsp;
 IANA Considerations</h3>
@@ -883,7 +1012,7 @@ IANA Considerations</h3>
         and, possibly, new HTTP status codes.  These need to be
         registered.  Registration information to-be-added.
 </p>
-<a name="anchor21"></a><br /><hr />
+<a name="anchor24"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.6"></a><h3>6.&nbsp;
 Security Considerations</h3>
@@ -959,7 +1088,7 @@ Security Considerations</h3>
 </p>
 <p>...
 </p>
-<a name="anchor22"></a><br /><hr />
+<a name="anchor25"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.6.1"></a><h3>6.1.&nbsp;
 User Interface and Scripting Interface Recommendations</h3>
@@ -997,14 +1126,14 @@ User Interface and Scripting Interface Recommendations</h3>
           names, if any, specified by scripts downloaded from a
           site.
 </p>
-<a name="anchor23"></a><br /><hr />
+<a name="anchor26"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.6.2"></a><h3>6.2.&nbsp;
 Platform Integration</h3>
 
 <p>[Add notes about platform integration. -Nico]
 </p>
-<a name="anchor24"></a><br /><hr />
+<a name="anchor27"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.6.3"></a><h3>6.3.&nbsp;
 Anti-Phishing</h3>
@@ -1058,6 +1187,8 @@ References</h3>
 <td class="author-text">Zeilenga, K., &ldquo;<a href="http://tools.ietf.org/html/rfc4013">SASLprep: Stringprep Profile for User Names and Passwords</a>,&rdquo; RFC&nbsp;4013, February&nbsp;2005 (<a href="http://www.rfc-editor.org/rfc/rfc4013.txt">TXT</a>).</td></tr>
 <tr><td class="author-text" valign="top"><a name="RFC4121">[RFC4121]</a></td>
 <td class="author-text">Zhu, L., Jaganathan, K., and S. Hartman, &ldquo;<a href="http://tools.ietf.org/html/rfc4121">The Kerberos Version 5 Generic Security Service Application Program Interface (GSS-API) Mechanism: Version 2</a>,&rdquo; RFC&nbsp;4121, July&nbsp;2005 (<a href="http://www.rfc-editor.org/rfc/rfc4121.txt">TXT</a>).</td></tr>
+<tr><td class="author-text" valign="top"><a name="RFC4401">[RFC4401]</a></td>
+<td class="author-text">Williams, N., &ldquo;<a href="http://tools.ietf.org/html/rfc4401">A Pseudo-Random Function (PRF) API Extension for the Generic Security Service Application Program Interface (GSS-API)</a>,&rdquo; RFC&nbsp;4401, February&nbsp;2006 (<a href="http://www.rfc-editor.org/rfc/rfc4401.txt">TXT</a>).</td></tr>
 <tr><td class="author-text" valign="top"><a name="RFC5280">[RFC5280]</a></td>
 <td class="author-text">Cooper, D., Santesson, S., Farrell, S., Boeyen, S., Housley, R., and W. Polk, &ldquo;<a href="http://tools.ietf.org/html/rfc5280">Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile</a>,&rdquo; RFC&nbsp;5280, May&nbsp;2008 (<a href="http://www.rfc-editor.org/rfc/rfc5280.txt">TXT</a>).</td></tr>
 <tr><td class="author-text" valign="top"><a name="RFC5802">[RFC5802]</a></td>

@@ -25,6 +25,7 @@
 
   <!ENTITY rfc4013 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4013.xml'>
   <!ENTITY rfc4121 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4121.xml'>
+  <!ENTITY rfc4401 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4401.xml'>
   <!ENTITY rfc5802 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5802.xml'>
   <!ENTITY rfc5280 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5280.xml'>
   <!ENTITY rfc5849 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5849.xml'>
@@ -120,17 +121,22 @@
         security for HTTP applications whenever GSS mechanisms are used
         that provide mutual authentication.</t>
 
-      <t>The GSS-API, and through the SASL/GS2 mechanism bridge, SASL,
-        enjoys a large and growing number of security mechanisms, such
-        as Kerberos V5 <xref target='RFC4121'/>, SCRAM <xref
+      <t>The GSS-API, and through the "GS2" mechanism bridge, Simple
+        Authentication and Security Layers (SASL), enjoys a large and
+        growing number of security mechanisms, such as Kerberos V5 <xref
+          target='RFC4121'/>, SCRAM <xref
           target='RFC5802'/>, as well as a PKI-based mechanism [Add
         reference to PKU2U], mechanisms based on OAuth <xref
           target='RFC5849'/>, OpenID <xref
           target='I-D.ietf-kitten-sasl-openid'/>, SAML <xref
-            target='I-D.ietf-kitten-sasl-saml'/>, and EAP <xref
-            target='I-D.ietf-abfab-gss-eap'/>, as well as various legacy
-          mechanisms such as NTLM [add reference] and a Diffie-Hellman
-          mechanism [add reference].</t>
+          target='I-D.ietf-kitten-sasl-saml'/>, and EAP <xref
+          target='I-D.ietf-abfab-gss-eap'/>, as well as various legacy
+        mechanisms such as NTLM [add reference] and a Diffie-Hellman
+        mechanism [add reference].</t>
+
+      <t>Much of this document assumes some reader familiarity with the
+        GSS-API and SASL.  To aid readers new to the GSS-API we provide
+        a GSS primer section, below.</t>
 
       <section title="On Application-Layer Authentication Services">
 
@@ -165,6 +171,107 @@
           "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
           document are to be interpreted as described in <xref
             target="RFC2119"></xref> .</t>
+
+      </section>
+
+      <section title='GSS-API and SASL Primer'>
+
+        <t>The GSS-API and SASL are both simple security frameworks
+          providing pluggable authentication services and transport
+          protection facilities to applications.  By "pluggable" we mean
+          that multiple "security mechanisms" may be used by
+          applications without requiring different specifications for
+          how the applications use each security mechanism.  Moreover,
+          application programming interfaces (APIs) for GSS and SASL can
+          also be pluggable, requiring no changes to applications in
+          order for them to use new mechanisms.</t>
+
+        <t>A "security mechanism" is an authentication protocol that
+          conforms to the requirements of the framework in which it
+          fits, and it provides the requisite authentication
+          facilities.  There are many examples of security mechanisms
+          [add some].</t>
+
+        <t>The two frameworks are sufficiently similar to each other
+          that a "bridge" has been added such that all GSS mechanisms
+          may be used as SASL mechanisms as well.  This bridge is known
+          as "GS2" <xref target='RFC5801'/>.  For the remainder of this
+          section we'll describe SASL only as it works with only GS2
+          mechanisms.</t>
+
+        <t>Authentication proceeds by having a client ("initiator", in
+          GSS terminology) send an initial authentication message
+          ("security context token", in GSS terminology).  The server
+          ("acceptor") consumes said token and produces one of three
+          results -success, failure, or "continue needed"-, as well as,
+          possibly, a message to return to the client.  The security
+          mechanism may require an arbitrary number of security context
+          tokens be exchanged, always in a synchronous fashion, until
+          ultimate success or failure.  Upon success the peers are said
+          to have a fully-established security context, which may then
+          be used to provide security services such as encryption.</t>
+
+        <t>In SASL the server may be the one to initiate the
+          authentication message exchange, but, when using GSS mechanisms
+          via the GS2 bridge it will always be the client that initiates
+          the exchange.  SASL also requires that the application define
+          an "outcome of authentication message", which is distinct from
+          any such message that the mechanism may provide.</t>
+
+        <t>Both frameworks allow mechanisms to provide facilities for
+          application data transport protection -- "security layers", in
+          SASL terminology.  SASL's security layers are stream oriented
+          (requiring ordered delivery), while GSS' are message oriented
+          (allowing out-of-order delivery), and thus the GSS-API's
+          security layers facilities are the more general ones.  The
+          GSS-API provides two methods of protecting application data:
+          "wrap tokens" and "message integrity check (MIC) tokens".
+          Wrap tokens bear application data within them, while MIC
+          tokens do not.  Thus wrap tokens may provide encryption
+          ("confidentiality protection"), while MIC tokens only provide
+          integrity protection.  MIC tokens are very similar to HMAC --
+          readers should think of HMAC output with a header affixed to
+          both, the HMAC output and the input.</t>
+
+        <t>The GSS-API also provides a keyed pseudo-random function
+          (PRF) <xref target='RFC4401'/> for keying any application's
+          non-standard security layers, if any.</t>
+
+        <t>SASL application protocols almost all have an option to use
+          TLS, therefore SASL's security layers are now eschewed in
+          favor of using TLS (with channel binding -- see below).  Not
+          all GSS-API application have an option to use a separate
+          system for transport security, thus GSS applications continue
+          to use the GSS-API's transport security facilities.</t>
+
+      </section>
+
+      <section title='Channel Binding Primer'>
+
+        <t>...</t>
+
+      </section>
+
+      <section title='Glossary'>
+
+        <t>[Finish...]
+
+          <list style='hanging' hangIndent='3'>
+
+            <t hangText='Application protocol'><vspace/>[Add definition...]</t>
+            <t hangText='Authentication'><vspace/>[Add definition...]</t>
+            <t hangText='Authentication message'><vspace/>[Add definition...]</t>
+            <t hangText='MIC token'><vspace/>[Add definition...]</t>
+            <t hangText='Outcome of authentication message'><vspace/>[Add definition...]</t>
+            <t hangText='Security mechanism'><vspace/>[Add definition...]</t>
+            <t hangText='Security context'><vspace/>[Add definition...]</t>
+            <t hangText='Security context token'><vspace/>[Add definition...]</t>
+            <t hangText='Security context token'><vspace/>[Add definition...]</t>
+            <t hangText='Wrap token'><vspace/>[Add definition...]</t>
+
+          </list>
+
+        </t>
 
       </section>
 
@@ -217,23 +324,18 @@
       <section title="Authentication Message Format">
 
         <t>The authentication messages from clients to servers SHALL be
-          formed as per the Simple Authentication and Security Layer's
-          <xref target='RFC4422'/> GSS-API bridge (known as 'GS2') <xref
-            target='RFC5801'/>.  The reason for this is simple:
-          implementors who lack a GSS-API implementation will find it
-          simpler to implement certain mechanisms if the GS2 framework
-          is used.</t>
+          formed as per SASL's <xref target='RFC4422'/> GSS-API bridge
+          (known as "GS2") <xref target='RFC5801'/>.  The reason for
+          this is simple: implementors who lack a GSS-API implementation
+          will find it simpler to implement certain mechanisms if the
+          GS2 framework is used.</t>
 
         <t>The authentication messages from servers to clients SHALL be
           formed SASL GS2 authentication messages pre-fixed with a
           header indicating authentication status.  The header consists
-          of a single byte, an ASCII character 'S' (success), 'F'
+          of a single byte: an ASCII character 'S' (success), 'F'
           (failure), or 'C' (the server expects more authentication
-          messages from the client).</t>
-
-        <t>Channel binding SHOULD be used whenever a) there is a secure
-          channel (namely, TLS), and b) the selected GSS-API mechanism
-          supports mutual authentication and channel binding.</t>
+          messages from the client), followed by an ASCII newline.</t>
 
       </section>
 
@@ -839,6 +941,7 @@
       &rfc2104;
       &rfc4013;
       &rfc4121;
+      &rfc4401;
       &rfc5802;
       &rfc5280;
       &rfc5849;
