@@ -446,46 +446,168 @@ GSS-API and SASL Primer</h3>
 <a name="rfc.section.1.4"></a><h3>1.4.&nbsp;
 Channel Binding Primer</h3>
 
-<p>...
+<p>Channel binding is a method for composing two or more
+            end-to-end security facilities such that one facility is
+            used to show that the end-points of the other are logically
+            the same as those of the first.  This allows applications to
+            perform authentication at the application layer while
+            leaving transport protection to a lower layer (e.g., TLS)
+            without compromising security.
+</p>
+<p>There are two key aspects to channel binding: a) "channels"
+            (lower layers) must export "channel bindings data" that are
+            cryptographically bound to the channel, and b)
+            authentication mechanisms must be able to consume channel
+            bindings data to ensure that those channel bindings data are
+            seen to be the same by both end-points of the authentication
+            mechanism.
+</p>
+<p>There exists a specification for TLS channel bindings data:
+            RFC5929 <a class='info' href='#RFC5929'>[RFC5929]<span> (</span><span class='info'>Altman, J., Williams, N., and L. Zhu, &ldquo;Channel Bindings for TLS,&rdquo; July&nbsp;2010.</span><span>)</span></a>.
+</p>
+<p>Most GSS-API and SASL/GS2 mechanisms support channel
+            binding.
+</p>
+<p>An application that supports a TLS channel for transport
+            protection, and application-layer authentication-layer
+            authentication using the GSS-API or SASL/GS2 can perform
+            channel binding to ensure that the application-layer and
+            TLS-layer end-points are the same -- that there is no
+            unauthorized man-in-the-middle (MITM) below the application
+            layer.  (An authorized MITM might be an authorized
+            proxy.)  This is quite simple: first establish a TLS
+            connection, then extract its channel bindings data, then
+            initiate GSS or SASL/GS2 authentication using those channel
+            bindings data as a channel binding input -- if
+            authentication succeeds, then the TLS channel is bound into
+            the GSS or SASL/GS2 authentication.
 </p>
 <a name="anchor6"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.1.5"></a><h3>1.5.&nbsp;
 Glossary</h3>
 
-<p>[Finish...]
+<p>This section is purely INFORMATIVE, being intended to inform
+	  readers who are not familiar with SASL and the GSS-API.
+	  Implementors should refer to the relevant RFCs.
+</p>
+<p>
 
           </p>
 <blockquote class="text"><dl>
 <dt>Application protocol</dt>
-<dd>[Add definition...]
+<dd>The protocol
+              that is at the top of the protocol stack, such as, for
+              example, IMAP, LDAP, WebDAV, etcetera [Add lots of
+              references].
 </dd>
 <dt>Authentication</dt>
-<dd>[Add definition...]
+<dd>A process by which one
+	      or more parties are identify themselves and prove (for
+	      some value of "prove") their identities to other
+	      parties.
 </dd>
 <dt>Authentication message</dt>
-<dd>[Add definition...]
+<dd>In SASL this
+              this refers to an opaque message to be exchanged during
+              authentication and which should carry authentication
+              information, possibly (likely) cryptographic in nature.
+</dd>
+<dt>Channel</dt>
+<dd>A security facility providing
+              secure, end-to-end transport of application data.  For
+              example: TLS.
+</dd>
+<dt>Channel binding</dt>
+<dd>A method of ensuring
+	      that the logical end-points of one secure channel are the
+	      same as those of another channel at a lower network
+	      layer.
+</dd>
+<dt>GS2</dt>
+<dd>An adaptation of GSS-API
+              mechanisms to SASL.  As SASL originally had such an
+              adaptation, we now term that original adaptation "GS1" and
+              the new adaptation is "GS2".  GS2 is significantly simpler
+              than GS1, provides channel binding (whereas GS1 did not),
+              and requires one fewer round-trip for its authentication
+              message exchange than GS1 does.  GS2's simplicity stems
+              from replacing a binary header required by the GSS-API
+              with a text header, as well as not requring the use of any
+              per-message tokens.
+</dd>
+<dt>GSS</dt>
+<dd>Generic Security Services.  An
+              abstraction around security mechanisms involving two
+              entities (a client and a server, effectively, though a
+              mechanism is allowed to use trusted third parties).
 </dd>
 <dt>MIC token</dt>
-<dd>[Add definition...]
+<dd>Message Integrity Check.  A
+              per-message token providing integrity protection to
+              application data.  A MIC token does not carry application
+              data within it.  See also per-message tokens.
 </dd>
-<dt>Outcome of authentication message</dt>
-<dd>[Add definition...]
+<dt>Outcome of authentication
+              message</dt>
+<dd>SASL requires that applications define,
+              for themselves, a message known as the "outcome of
+              authentication message", which should carry at least a bit
+              of information indicating whether authentication succeeded
+              or failed.  This is distinct from any such outcome of
+              authentication messages in security mechanisms (which the
+              GSS-API effectively requires, at least for authentication
+              success) in that it also indicates success of
+              authorization of the authenticated client entity to the
+              requested authorization ID (if any) on the target
+              service.
+</dd>
+<dt>Per-message tokens</dt>
+<dd>An octet string
+	      ("token") emitted, and consumed, by the GSS-API, and
+	      bearing or authenticating application data, with
+	      cryptographic integrity protection and, optionally,
+	      confidentiality protection.  There are two types of
+	      per-message tokens: MIC tokens, and wrap tokens, only the
+	      latter of which bears application data.  Per-message
+	      tokens may include headers with data, with cryptographic
+	      integrity protection and, optionally, confidentiality
+	      protection.
+</dd>
+<dt>SASL</dt>
+<dd>Simple Authenication and
+	      Security Layers (SASL) is a framework for authentication
+	      and transport security for applications.  SASL supports
+	      many security mechanisms, including all GSS mechanisms via
+	      the "GS2" bridge.
 </dd>
 <dt>Security mechanism</dt>
-<dd>[Add definition...]
+<dd>A security
+	      mechanism is a protocol that defines an authentication
+	      message (or "security context token") exchange for
+	      authenticating one or two principals (a client and a
+	      server).  A security mechanism may also provide for key
+	      exchange and transport security facilities.  Examples
+	      include [list some].
 </dd>
 <dt>Security context</dt>
-<dd>[Add definition...]
+<dd>A security context
+	      is the shared secret session keys and authenticated peer
+	      names that results from an authentication message exchange
+	      between two parties.
 </dd>
 <dt>Security context token</dt>
-<dd>[Add definition...]
-</dd>
-<dt>Security context token</dt>
-<dd>[Add definition...]
+<dd>An opaque
+	      octet string that is to be sent by the application to a
+	      peer as part of the act of authentication and security
+	      context establishment.  See also authentication
+	      message.
 </dd>
 <dt>Wrap token</dt>
-<dd>[Add definition...]
+<dd>A wrap token is a
+	      per-message token that bears application data, providing
+	      integrity protection to it, and possibly confidentiality
+	      protection as well.  See also per-message tokens.
 </dd>
 </dl></blockquote><p>
 
@@ -946,6 +1068,24 @@ Login, Session, and Logout, with SCRAM</h3>
 
          &lt;HTML source of http://A.example/some/doc.html&gt;
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Example request and response using MIC tokens&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+<br /><hr class="insert" />
+<div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
+   C-&gt;S: HTTP/1.1 DELETE /rest-...-session-9d0af5f680d4ff46
+         Host: A.example
+         REST-GSS-Request-MIC:
+            http://A.example/rest-gss-session-9d0af5f680d4ff46
+            &lt;base64-encoding of output of GSS_Get_MIC() using the
+             named session's security context and taken over a
+             minimal version of this request:
+
+	     HTTP/1.1 DELETE /rest-gss-session-9d0af5f680d4ff46
+             Host: A.example
+
+             &gt;
+
+   S-&gt;C: HTTP/1.1 200
+
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Example of session logout&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <a name="anchor21"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
