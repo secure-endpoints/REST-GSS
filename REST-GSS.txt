@@ -3,8 +3,8 @@
 
 NETWORK WORKING GROUP                                        N. Williams
 Internet-Draft                                              Cryptonector
-Intended status: Standards Track                            May 27, 2011
-Expires: November 28, 2011
+Intended status: Standards Track                            June 6, 2011
+Expires: December 8, 2011
 
 
   RESTful Hypertext Transfer Protocol Application-Layer Authentication
@@ -42,7 +42,7 @@ Status of this Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on November 28, 2011.
+   This Internet-Draft will expire on December 8, 2011.
 
 Copyright Notice
 
@@ -52,9 +52,9 @@ Copyright Notice
 
 
 
-Williams                Expires November 28, 2011               [Page 1]
+Williams                Expires December 8, 2011                [Page 1]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -108,9 +108,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011               [Page 2]
+Williams                Expires December 8, 2011                [Page 2]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
 Table of Contents
@@ -164,9 +164,9 @@ Table of Contents
 
 
 
-Williams                Expires November 28, 2011               [Page 3]
+Williams                Expires December 8, 2011                [Page 3]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
 1.  Introduction
@@ -220,9 +220,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011               [Page 4]
+Williams                Expires December 8, 2011                [Page 4]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    API and SASL.  To aid readers new to the GSS-API we provide a GSS
@@ -276,9 +276,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011               [Page 5]
+Williams                Expires December 8, 2011                [Page 5]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    The two frameworks are sufficiently similar to each other that a
@@ -332,9 +332,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011               [Page 6]
+Williams                Expires December 8, 2011                [Page 6]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    facilities.
@@ -388,9 +388,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011               [Page 7]
+Williams                Expires December 8, 2011                [Page 7]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
       prove (for some value of "prove") their identities to other
@@ -444,9 +444,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011               [Page 8]
+Williams                Expires December 8, 2011                [Page 8]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    Per-message tokens
@@ -500,9 +500,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011               [Page 9]
+Williams                Expires December 8, 2011                [Page 9]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    The server SHOULD respond to initial authentication messages with
@@ -556,9 +556,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 10]
+Williams                Expires December 8, 2011               [Page 10]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    client to the server must include a small text header described by
@@ -612,9 +612,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 11]
+Williams                Expires December 8, 2011               [Page 11]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    not specified, then to "HTTP".  For example, "HTTP@foo.example".
@@ -668,9 +668,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 12]
+Williams                Expires December 8, 2011               [Page 12]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    In any case of ambiguity or failure to specify, the client SHOULD
@@ -724,9 +724,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 13]
+Williams                Expires December 8, 2011               [Page 13]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
       (this field MUST be sent in the request as well if present in the
@@ -780,9 +780,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 14]
+Williams                Expires December 8, 2011               [Page 14]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    [Add text describing a method of associating REST-GSS session URIs
@@ -836,9 +836,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 15]
+Williams                Expires December 8, 2011               [Page 15]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
             session-binding: MIC-CB, MIC-body
@@ -893,9 +893,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 16]
+Williams                Expires December 8, 2011               [Page 16]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
             REST-GSS-Request-MIC:
@@ -949,9 +949,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 17]
+Williams                Expires December 8, 2011               [Page 17]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    All that is required in order to implement REST-GSS is one or more
@@ -1005,9 +1005,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 18]
+Williams                Expires December 8, 2011               [Page 18]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    GSS-API [RFC2743], SASL [RFC4422], and GS2 [RFC5801] apply.  When
@@ -1061,9 +1061,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 19]
+Williams                Expires December 8, 2011               [Page 19]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    fields present in the data that the MIC is taken over, unless the
@@ -1117,9 +1117,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 20]
+Williams                Expires December 8, 2011               [Page 20]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    constraints to the REST-GSS target service names, if any, specified
@@ -1173,9 +1173,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 21]
+Williams                Expires December 8, 2011               [Page 21]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
    [RFC5929]  Altman, J., Williams, N., and L. Zhu, "Channel Bindings
@@ -1229,9 +1229,9 @@ Internet-Draft                  REST-GSS                        May 2011
 
 
 
-Williams                Expires November 28, 2011              [Page 22]
+Williams                Expires December 8, 2011               [Page 22]
 
-Internet-Draft                  REST-GSS                        May 2011
+Internet-Draft                  REST-GSS                       June 2011
 
 
               April 2010.
@@ -1285,5 +1285,5 @@ Author's Address
 
 
 
-Williams                Expires November 28, 2011              [Page 23]
+Williams                Expires December 8, 2011               [Page 23]
 
