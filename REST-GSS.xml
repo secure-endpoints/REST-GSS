@@ -18,6 +18,7 @@
   <!ENTITY rfc2743 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2743.xml'>
   <!ENTITY rfc4422 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4422.xml'>
   <!ENTITY rfc5056 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5056.xml'>
+  <!ENTITY rfc5234 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5234.xml'>
   <!ENTITY rfc5246 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5246.xml'>
   <!ENTITY rfc5587 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5587.xml'>
   <!ENTITY rfc5801 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5801.xml'>
@@ -451,10 +452,12 @@
 
         <t>The authentication messages from clients to servers SHALL be
           formed as per SASL's <xref target='RFC4422'/> GSS-API bridge
-          (known as "GS2") <xref target='RFC5801'/>.  The reason for
-          this is simple: implementors who lack a GSS-API implementation
-          will find it simpler to implement certain mechanisms if the
-          GS2 framework is used.</t>
+          (known as "GS2") <xref target='RFC5801'/>, with the initial
+	  authentication message prefixed with a text header indicating
+	  what options were selected.  The reason for this is simple:
+	  implementors who lack a GSS-API implementation will find it
+	  simpler to implement certain mechanisms if the GS2 framework
+	  is used.</t>
 
         <t>The authentication messages from servers to clients SHALL be
           formed SASL GS2 authentication messages pre-fixed with a
@@ -462,6 +465,20 @@
           of a single byte: an ASCII character 'S' (success), 'F'
           (failure), or 'C' (the server expects more authentication
           messages from the client), followed by an ASCII newline.</t>
+
+        <section title="ABNF for Initial Authentication Message Header">
+
+          <t>As described above, the initial authentication message from
+            the client to the server must include a small text header
+            described by the following Augmented Backus-Naur Form (ABNF)
+            <xref target='RFC5234'/>:</t>
+
+          <t>[Add ABNF for a header consisting of a) the selected
+            SASL/GS2 mechanism name, b) the name of the channel
+            binding type selected, c) the session protection options
+            selected, d) room for extensions. -Nico]</t>
+
+        </section>
 
       </section>
 
@@ -800,7 +817,7 @@
          Content-Type: application/rest-gss-login
          Content-Length: nnn
 
-         SCRAM-SHA-1
+         SCRAM-SHA-1,,MIC
          n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL
 
    S->C: HTTP/1.1 201
@@ -1077,6 +1094,7 @@
       &rfc2743;
       &rfc4422;
       &rfc5056;
+      &rfc5234;
       &rfc5246;
       &rfc5587;
       &rfc5801;

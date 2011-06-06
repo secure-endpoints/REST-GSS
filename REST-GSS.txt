@@ -115,38 +115,38 @@ Internet-Draft                  REST-GSS                        May 2011
 
 Table of Contents
 
-   1.    Introduction . . . . . . . . . . . . . . . . . . . . . . . .  4
-   1.1.  On Application-Layer Authentication Services . . . . . . . .  5
-   1.2.  Conventions used in this document  . . . . . . . . . . . . .  5
-   1.3.  GSS-API and SASL Primer  . . . . . . . . . . . . . . . . . .  5
-   1.4.  Channel Binding Primer . . . . . . . . . . . . . . . . . . .  7
-   1.5.  Glossary . . . . . . . . . . . . . . . . . . . . . . . . . .  7
-   2.    The Protocol . . . . . . . . . . . . . . . . . . . . . . . .  9
-   2.1.  Authentication Message Format  . . . . . . . . . . . . . . . 10
-   2.2.  Authentication State Cookies . . . . . . . . . . . . . . . . 10
-   2.3.  Target Service Naming  . . . . . . . . . . . . . . . . . . . 11
-   2.4.  Authorization ID Form  . . . . . . . . . . . . . . . . . . . 11
-   2.5.  Mechanism, Channel Binding Type, and Other Negotiation . . . 12
-   2.6.  Session Status Representation  . . . . . . . . . . . . . . . 12
-   2.7.  Session Binding via MIC Tokens . . . . . . . . . . . . . . . 13
-   2.8.  Alternative Session Binding Options  . . . . . . . . . . . . 14
-   2.9.  Server Indication of Authentication Requirement  . . . . . . 14
-   3.    Examples . . . . . . . . . . . . . . . . . . . . . . . . . . 15
-   3.1.  Server Decides When to Authenticate  . . . . . . . . . . . . 15
-   3.2.  Mechanism and Other Negotiation  . . . . . . . . . . . . . . 15
-   3.3.  Login, Session, and Logout, with SCRAM . . . . . . . . . . . 15
-   4.    Implementation and Deployment Considerations . . . . . . . . 17
-   4.1.  Desired GSS-API Extensions . . . . . . . . . . . . . . . . . 18
-   5.    IANA Considerations  . . . . . . . . . . . . . . . . . . . . 18
-   6.    Security Considerations  . . . . . . . . . . . . . . . . . . 18
-   6.1.  User Interface and Scripting Interface Recommendations . . . 20
-   6.2.  Platform Integration . . . . . . . . . . . . . . . . . . . . 20
-   6.3.  Anti-Phishing  . . . . . . . . . . . . . . . . . . . . . . . 20
-   7.    References . . . . . . . . . . . . . . . . . . . . . . . . . 21
-   7.1.  Normative References . . . . . . . . . . . . . . . . . . . . 21
-   7.2.  Informative References . . . . . . . . . . . . . . . . . . . 21
-         Author's Address . . . . . . . . . . . . . . . . . . . . . . 22
-
+   1.      Introduction . . . . . . . . . . . . . . . . . . . . . . .  4
+   1.1.    On Application-Layer Authentication Services . . . . . . .  5
+   1.2.    Conventions used in this document  . . . . . . . . . . . .  5
+   1.3.    GSS-API and SASL Primer  . . . . . . . . . . . . . . . . .  5
+   1.4.    Channel Binding Primer . . . . . . . . . . . . . . . . . .  7
+   1.5.    Glossary . . . . . . . . . . . . . . . . . . . . . . . . .  7
+   2.      The Protocol . . . . . . . . . . . . . . . . . . . . . . .  9
+   2.1.    Authentication Message Format  . . . . . . . . . . . . . . 10
+   2.1.1.  ABNF for Initial Authentication Message Header . . . . . . 10
+   2.2.    Authentication State Cookies . . . . . . . . . . . . . . . 11
+   2.3.    Target Service Naming  . . . . . . . . . . . . . . . . . . 11
+   2.4.    Authorization ID Form  . . . . . . . . . . . . . . . . . . 12
+   2.5.    Mechanism, Channel Binding Type, and Other Negotiation . . 12
+   2.6.    Session Status Representation  . . . . . . . . . . . . . . 13
+   2.7.    Session Binding via MIC Tokens . . . . . . . . . . . . . . 13
+   2.8.    Alternative Session Binding Options  . . . . . . . . . . . 14
+   2.9.    Server Indication of Authentication Requirement  . . . . . 15
+   3.      Examples . . . . . . . . . . . . . . . . . . . . . . . . . 15
+   3.1.    Server Decides When to Authenticate  . . . . . . . . . . . 15
+   3.2.    Mechanism and Other Negotiation  . . . . . . . . . . . . . 15
+   3.3.    Login, Session, and Logout, with SCRAM . . . . . . . . . . 16
+   4.      Implementation and Deployment Considerations . . . . . . . 17
+   4.1.    Desired GSS-API Extensions . . . . . . . . . . . . . . . . 18
+   5.      IANA Considerations  . . . . . . . . . . . . . . . . . . . 18
+   6.      Security Considerations  . . . . . . . . . . . . . . . . . 18
+   6.1.    User Interface and Scripting Interface Recommendations . . 20
+   6.2.    Platform Integration . . . . . . . . . . . . . . . . . . . 21
+   6.3.    Anti-Phishing  . . . . . . . . . . . . . . . . . . . . . . 21
+   7.      References . . . . . . . . . . . . . . . . . . . . . . . . 21
+   7.1.    Normative References . . . . . . . . . . . . . . . . . . . 21
+   7.2.    Informative References . . . . . . . . . . . . . . . . . . 22
+           Author's Address . . . . . . . . . . . . . . . . . . . . . 23
 
 
 
@@ -537,10 +537,11 @@ Internet-Draft                  REST-GSS                        May 2011
 2.1.  Authentication Message Format
 
    The authentication messages from clients to servers SHALL be formed
-   as per SASL's [RFC4422] GSS-API bridge (known as "GS2") [RFC5801].
-   The reason for this is simple: implementors who lack a GSS-API
-   implementation will find it simpler to implement certain mechanisms
-   if the GS2 framework is used.
+   as per SASL's [RFC4422] GSS-API bridge (known as "GS2") [RFC5801],
+   with the initial authentication message prefixed with a text header
+   indicating what options were selected.  The reason for this is
+   simple: implementors who lack a GSS-API implementation will find it
+   simpler to implement certain mechanisms if the GS2 framework is used.
 
    The authentication messages from servers to clients SHALL be formed
    SASL GS2 authentication messages pre-fixed with a header indicating
@@ -549,10 +550,9 @@ Internet-Draft                  REST-GSS                        May 2011
    expects more authentication messages from the client), followed by an
    ASCII newline.
 
-2.2.  Authentication State Cookies
+2.1.1.  ABNF for Initial Authentication Message Header
 
-   REST-GSS application server implementations must build and preserve
-   authentication state via a "GSS security context".  Clients must
+   As described above, the initial authentication message from the
 
 
 
@@ -561,6 +561,18 @@ Williams                Expires November 28, 2011              [Page 10]
 Internet-Draft                  REST-GSS                        May 2011
 
 
+   client to the server must include a small text header described by
+   the following Augmented Backus-Naur Form (ABNF) [RFC5234]:
+
+   [Add ABNF for a header consisting of a) the selected SASL/GS2
+   mechanism name, b) the name of the channel binding type selected, c)
+   the session protection options selected, d) room for extensions.
+   -Nico]
+
+2.2.  Authentication State Cookies
+
+   REST-GSS application server implementations must build and preserve
+   authentication state via a "GSS security context".  Clients must
    identify such state in the case of security mechanisms that require
    multiple authentication message round trips.  The REST-GSS session
    URI may suffice for this purpose.
@@ -597,6 +609,14 @@ Internet-Draft                  REST-GSS                        May 2011
    GSS_C_NT_HOSTBASED_SERVICE, with the hostname portion of the name
    being the name of the host to which the client is authenticating.
    The service name SHOULD be set as required by the application, or, if
+
+
+
+Williams                Expires November 28, 2011              [Page 11]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
    not specified, then to "HTTP".  For example, "HTTP@foo.example".
 
    [It'd be good to explore a form of domain-based service naming
@@ -609,14 +629,6 @@ Internet-Draft                  REST-GSS                        May 2011
    The form of the authorization ID, if any is supported, SHALL be
    specified by the application.  Applications that make no use of the
    authorization ID SHOULD reject authentication attempts requesting any
-
-
-
-Williams                Expires November 28, 2011              [Page 11]
-
-Internet-Draft                  REST-GSS                        May 2011
-
-
    non-empty authorization ID.
 
    Applications that intend to use the SASL authorization ID feature
@@ -653,6 +665,14 @@ Internet-Draft                  REST-GSS                        May 2011
    Applications must specify any pre-agreed channel binding type
    selection criteria.
 
+
+
+
+Williams                Expires November 28, 2011              [Page 12]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
    In any case of ambiguity or failure to specify, the client SHOULD
    pick the tls-server-end-point channel binding type [RFC5929] if a
    server certificate was used to authenticate the server end-point of
@@ -664,14 +684,6 @@ Internet-Draft                  REST-GSS                        May 2011
    URI.  The status of a session SHALL consist of:
 
    o  [Add an ABNF for a field/value list with the following elements:
-
-
-
-
-Williams                Expires November 28, 2011              [Page 12]
-
-Internet-Draft                  REST-GSS                        May 2011
-
 
       *  a boolean to indicate whether the session is fully established;
 
@@ -709,6 +721,14 @@ Internet-Draft                  REST-GSS                        May 2011
    o  optionally a Request-Nanoseconds field bearing a nanoseconds
       component of the time at which the request was made, as an
       unsigned integer in decimal, ASCII respresentation (e.g., 1234567)
+
+
+
+Williams                Expires November 28, 2011              [Page 13]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
       (this field MUST be sent in the request as well if present in the
       MIC input);
 
@@ -721,13 +741,6 @@ Internet-Draft                  REST-GSS                        May 2011
 
    o  the request body if and only if there is no channel to bind to,
       else an empty request body.
-
-
-
-Williams                Expires November 28, 2011              [Page 13]
-
-Internet-Draft                  REST-GSS                        May 2011
-
 
    The request MIC is base64-encoded, prefixed with the session URI
    (separated by an ASCII semi-colon) and placed in a header field named
@@ -764,6 +777,14 @@ Internet-Draft                  REST-GSS                        May 2011
 
    [Add text describing the use of cookies instead of MIC tokens.]
 
+
+
+
+Williams                Expires November 28, 2011              [Page 14]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
    [Add text describing a method of associating REST-GSS session URIs
    with TLS session IDs instead of using MIC tokens on every request/
    response.  This is only workable when the client's and server's HTTP/
@@ -777,14 +798,6 @@ Internet-Draft                  REST-GSS                        May 2011
    with a 303 redirect to a login page (this in the case of browser
    applications) or a TBD 4xx error indicating that access requires
    REST-GSS login and, optionally directing the client to the REST-GSS
-
-
-
-Williams                Expires November 28, 2011              [Page 14]
-
-Internet-Draft                  REST-GSS                        May 2011
-
-
    login URI by listing that URI in a response header field named 'REST-
    GSS-Authenticate'.
 
@@ -820,6 +833,14 @@ Internet-Draft                  REST-GSS                        May 2011
 
             mechs: SCRAM-SHA-1-PLUS,GSS-KRB5-PLUS
             channel-binding-types: tls-server-end-point
+
+
+
+Williams                Expires November 28, 2011              [Page 15]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
             session-binding: MIC-CB, MIC-body
             replay-protection: optional
 
@@ -833,17 +854,9 @@ Internet-Draft                  REST-GSS                        May 2011
       C->S: HTTP/1.1 POST /rest-gss-login
             Host: A.example
             Content-Type: application/rest-gss-login
-
-
-
-Williams                Expires November 28, 2011              [Page 15]
-
-Internet-Draft                  REST-GSS                        May 2011
-
-
             Content-Length: nnn
 
-            SCRAM-SHA-1
+            SCRAM-SHA-1,,MIC
             n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL
 
       S->C: HTTP/1.1 201
@@ -877,6 +890,14 @@ Internet-Draft                  REST-GSS                        May 2011
 
       C->S: HTTP/1.1 GET /some/doc.html
             Host: A.example
+
+
+
+Williams                Expires November 28, 2011              [Page 16]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
             REST-GSS-Request-MIC:
                http://A.example/rest-gss-session-9d0af5f680d4ff46
                <base64-encoding of output of GSS_Get_MIC() using the
@@ -890,14 +911,6 @@ Internet-Draft                  REST-GSS                        May 2011
 
       S->C: HTTP/1.1 200
             Content-Type: text/html
-
-
-
-Williams                Expires November 28, 2011              [Page 16]
-
-Internet-Draft                  REST-GSS                        May 2011
-
-
             Content-Length: nnn
 
             <HTML source of http://A.example/some/doc.html>
@@ -933,6 +946,14 @@ Internet-Draft                  REST-GSS                        May 2011
    implementations, though it is preferable to use TLS implementations
    that output channel bindings data [RFC5929].
 
+
+
+
+Williams                Expires November 28, 2011              [Page 17]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
    All that is required in order to implement REST-GSS is one or more
    GSS-API security mechanisms, whether used directly or via an actual
    GSS-API framework implementation.  Note that an implementation of the
@@ -946,14 +967,6 @@ Internet-Draft                  REST-GSS                        May 2011
 
    The largest obstacle for REST-GSS implementation lies in the web
    browser, in the case of browser-based applications: without a native
-
-
-
-Williams                Expires November 28, 2011              [Page 17]
-
-Internet-Draft                  REST-GSS                        May 2011
-
-
    implementation of REST-GSS in the browser (or the platform, but
    accessed via the browser), the only way to implement REST-GSS is by
    implementing a security mechanism JavaScript [XXX Add reference.
@@ -989,6 +1002,14 @@ Internet-Draft                  REST-GSS                        May 2011
 6.  Security Considerations
 
    The security considerations of HTTP [RFC2616], TLS [RFC5246], the
+
+
+
+Williams                Expires November 28, 2011              [Page 18]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
    GSS-API [RFC2743], SASL [RFC4422], and GS2 [RFC5801] apply.  When
    channel binding is used the security considerations of [RFC5056] and
    [RFC5929] also apply.  Some of the security considerations of HTTP
@@ -1001,14 +1022,6 @@ Internet-Draft                  REST-GSS                        May 2011
    providers, particularly mutual authentication and channel binding,
    which together can significantly strengthen the authentication of
    services otherwise provided only by TLS.
-
-
-
-
-Williams                Expires November 28, 2011              [Page 18]
-
-Internet-Draft                  REST-GSS                        May 2011
-
 
    Some GSS-API security mechanisms are not secure against eavesdroppers
    or active attacks.  Therefore REST-GSS applications MUST use TLS with
@@ -1045,6 +1058,14 @@ Internet-Draft                  REST-GSS                        May 2011
 
    REST-GSS applications that are sensitive to replays of requests
    SHOULD use MIC tokens with Request-Date and Request-Nanoseconds
+
+
+
+Williams                Expires November 28, 2011              [Page 19]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
    fields present in the data that the MIC is taken over, unless the
    server supports tls-unique channel bindings, in which case the
    application SHOULD NOT include Request-Date and Request-Nanoseconds
@@ -1058,14 +1079,6 @@ Internet-Draft                  REST-GSS                        May 2011
 
    While it is convenient to have servers decide when authentication is
    required on the basis of the URIs being accessed by the client, this
-
-
-
-Williams                Expires November 28, 2011              [Page 19]
-
-Internet-Draft                  REST-GSS                        May 2011
-
-
    can leak information.  It is best to require authentication, or not,
    for an entire site.
 
@@ -1101,6 +1114,14 @@ Internet-Draft                  REST-GSS                        May 2011
    the status of a REST-GSS session.
 
    Cross-site scripting note: browsers MUST apply same-origin-like
+
+
+
+Williams                Expires November 28, 2011              [Page 20]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
    constraints to the REST-GSS target service names, if any, specified
    by scripts downloaded from a site.
 
@@ -1113,13 +1134,6 @@ Internet-Draft                  REST-GSS                        May 2011
    [Add notes about how mutual authentication via federated security
    mechanisms may reduce the scope of phishing attacks by effectively
    adding a service whitelist of sorts. -Nico]
-
-
-
-
-Williams                Expires November 28, 2011              [Page 20]
-
-Internet-Draft                  REST-GSS                        May 2011
 
 
 7.  References
@@ -1142,6 +1156,9 @@ Internet-Draft                  REST-GSS                        May 2011
    [RFC5056]  Williams, N., "On the Use of Channel Bindings to Secure
               Channels", RFC 5056, November 2007.
 
+   [RFC5234]  Crocker, D. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, RFC 5234, January 2008.
+
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
               (TLS) Protocol Version 1.2", RFC 5246, August 2008.
 
@@ -1152,6 +1169,14 @@ Internet-Draft                  REST-GSS                        May 2011
               Service Application Program Interface (GSS-API) Mechanisms
               in Simple Authentication and Security Layer (SASL): The
               GS2 Mechanism Family", RFC 5801, July 2010.
+
+
+
+
+Williams                Expires November 28, 2011              [Page 21]
+
+Internet-Draft                  REST-GSS                        May 2011
+
 
    [RFC5929]  Altman, J., Williams, N., and L. Zhu, "Channel Bindings
               for TLS", RFC 5929, July 2010.
@@ -1169,14 +1194,6 @@ Internet-Draft                  REST-GSS                        May 2011
               "A SASL & GSS-API Mechanism for OpenID",
               draft-ietf-kitten-sasl-openid-02 (work in progress),
               April 2011.
-
-
-
-
-Williams                Expires November 28, 2011              [Page 21]
-
-Internet-Draft                  REST-GSS                        May 2011
-
 
    [I-D.ietf-kitten-sasl-saml]
               Wierenga, K., Lear, E., and S. Josefsson, "A SASL and GSS-
@@ -1209,6 +1226,14 @@ Internet-Draft                  REST-GSS                        May 2011
               (SCRAM) SASL and GSS-API Mechanisms", RFC 5802, July 2010.
 
    [RFC5849]  Hammer-Lahav, E., "The OAuth 1.0 Protocol", RFC 5849,
+
+
+
+Williams                Expires November 28, 2011              [Page 22]
+
+Internet-Draft                  REST-GSS                        May 2011
+
+
               April 2010.
 
 
@@ -1229,5 +1254,36 @@ Author's Address
 
 
 
-Williams                Expires November 28, 2011              [Page 22]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Williams                Expires November 28, 2011              [Page 23]
 
