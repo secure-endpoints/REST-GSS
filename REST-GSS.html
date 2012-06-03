@@ -144,10 +144,10 @@
 <table summary="layout" width="66%" border="0" cellpadding="0" cellspacing="0"><tr><td><table summary="layout" width="100%" border="0" cellpadding="2" cellspacing="1">
 <tr><td class="header">NETWORK WORKING GROUP</td><td class="header">N. Williams</td></tr>
 <tr><td class="header">Internet-Draft</td><td class="header">Cryptonector</td></tr>
-<tr><td class="header">Intended status: Standards Track</td><td class="header">June 6, 2011</td></tr>
-<tr><td class="header">Expires: December 8, 2011</td><td class="header">&nbsp;</td></tr>
+<tr><td class="header">Intended status: Standards Track</td><td class="header">June 2, 2012</td></tr>
+<tr><td class="header">Expires: December 4, 2012</td><td class="header">&nbsp;</td></tr>
 </table></td></tr></table>
-<h1><br />RESTful Hypertext Transfer Protocol Application-Layer Authentication Using Generic Security Services<br />draft-williams-rest-gss-00</h1>
+<h1><br />RESTful Hypertext Transfer Protocol Application-Layer Authentication Using Generic Security Services<br />draft-williams-rest-gss-01</h1>
 
 <h3>Abstract</h3>
 
@@ -181,11 +181,11 @@ and may be updated, replaced, or obsoleted by other documents at any time.
 It is inappropriate to use Internet-Drafts as reference material or to cite
 them other than as &ldquo;work in progress.&rdquo;</p>
 <p>
-This Internet-Draft will expire on December 8, 2011.</p>
+This Internet-Draft will expire on December 4, 2012.</p>
 
 <h3>Copyright Notice</h3>
 <p>
-Copyright (c) 2011 IETF Trust and the persons identified as the
+Copyright (c) 2012 IETF Trust and the persons identified as the
 document authors.  All rights reserved.</p>
 <p>
 This document is subject to BCP 78 and the IETF Trust's Legal
@@ -325,7 +325,7 @@ Introduction</h3>
 <p>The GSS-API, and through the "GS2" mechanism bridge, Simple
         Authentication and Security Layers (SASL), enjoys a large and
         growing number of security mechanisms, such as Kerberos V5 <a class='info' href='#RFC4121'>[RFC4121]<span> (</span><span class='info'>Zhu, L., Jaganathan, K., and S. Hartman, &ldquo;The Kerberos Version 5 Generic Security Service Application Program Interface (GSS-API) Mechanism: Version 2,&rdquo; July&nbsp;2005.</span><span>)</span></a>, SCRAM <a class='info' href='#RFC5802'>[RFC5802]<span> (</span><span class='info'>Newman, C., Menon-Sen, A., Melnikov, A., and N. Williams, &ldquo;Salted Challenge Response Authentication Mechanism (SCRAM) SASL and GSS-API Mechanisms,&rdquo; July&nbsp;2010.</span><span>)</span></a>, as well as a PKI-based mechanism [Add
-        reference to PKU2U], mechanisms based on OAuth <a class='info' href='#RFC5849'>[RFC5849]<span> (</span><span class='info'>Hammer-Lahav, E., &ldquo;The OAuth 1.0 Protocol,&rdquo; April&nbsp;2010.</span><span>)</span></a>, OpenID <a class='info' href='#I-D.ietf-kitten-sasl-openid'>[I&#8209;D.ietf&#8209;kitten&#8209;sasl&#8209;openid]<span> (</span><span class='info'>Lear, E., Tschofenig, H., Mauldin, H., and S. Josefsson, &ldquo;A SASL &amp; GSS-API Mechanism for OpenID,&rdquo; April&nbsp;2011.</span><span>)</span></a>, SAML <a class='info' href='#I-D.ietf-kitten-sasl-saml'>[I&#8209;D.ietf&#8209;kitten&#8209;sasl&#8209;saml]<span> (</span><span class='info'>Wierenga, K., Lear, E., and S. Josefsson, &ldquo;A SASL and GSS-API Mechanism for SAML,&rdquo; February&nbsp;2011.</span><span>)</span></a>, and EAP <a class='info' href='#I-D.ietf-abfab-gss-eap'>[I&#8209;D.ietf&#8209;abfab&#8209;gss&#8209;eap]<span> (</span><span class='info'>Hartman, S. and J. Howlett, &ldquo;A GSS-API Mechanism for the Extensible Authentication Protocol,&rdquo; February&nbsp;2011.</span><span>)</span></a>, as well as various legacy
+        reference to PKU2U], mechanisms based on OAuth <a class='info' href='#RFC5849'>[RFC5849]<span> (</span><span class='info'>Hammer-Lahav, E., &ldquo;The OAuth 1.0 Protocol,&rdquo; April&nbsp;2010.</span><span>)</span></a>, OpenID <a class='info' href='#I-D.ietf-kitten-sasl-openid'>[I&#8209;D.ietf&#8209;kitten&#8209;sasl&#8209;openid]<span> (</span><span class='info'>Lear, E., Tschofenig, H., Mauldin, H., and S. Josefsson, &ldquo;A SASL &amp; GSS-API Mechanism for OpenID,&rdquo; February&nbsp;2012.</span><span>)</span></a>, SAML <a class='info' href='#I-D.ietf-kitten-sasl-saml'>[I&#8209;D.ietf&#8209;kitten&#8209;sasl&#8209;saml]<span> (</span><span class='info'>Wierenga, K., Lear, E., and S. Josefsson, &ldquo;A SASL and GSS-API Mechanism for SAML,&rdquo; February&nbsp;2012.</span><span>)</span></a>, and EAP <a class='info' href='#I-D.ietf-abfab-gss-eap'>[I&#8209;D.ietf&#8209;abfab&#8209;gss&#8209;eap]<span> (</span><span class='info'>Hartman, S. and J. Howlett, &ldquo;A GSS-API Mechanism for the Extensible Authentication Protocol,&rdquo; May&nbsp;2012.</span><span>)</span></a>, as well as various legacy
         mechanisms such as NTLM [add reference] and a Diffie-Hellman
         mechanism [add reference].
 </p>
@@ -1337,11 +1337,11 @@ References</h3>
 <h3>7.2.&nbsp;Informative References</h3>
 <table width="99%" border="0">
 <tr><td class="author-text" valign="top"><a name="I-D.ietf-abfab-gss-eap">[I-D.ietf-abfab-gss-eap]</a></td>
-<td class="author-text">Hartman, S. and J. Howlett, &ldquo;<a href="http://tools.ietf.org/html/draft-ietf-abfab-gss-eap-01">A GSS-API Mechanism for the Extensible Authentication Protocol</a>,&rdquo; draft-ietf-abfab-gss-eap-01 (work in progress), February&nbsp;2011 (<a href="http://www.ietf.org/internet-drafts/draft-ietf-abfab-gss-eap-01.txt">TXT</a>).</td></tr>
+<td class="author-text">Hartman, S. and J. Howlett, &ldquo;<a href="http://tools.ietf.org/html/draft-ietf-abfab-gss-eap-07">A GSS-API Mechanism for the Extensible Authentication Protocol</a>,&rdquo; draft-ietf-abfab-gss-eap-07 (work in progress), May&nbsp;2012 (<a href="http://www.ietf.org/internet-drafts/draft-ietf-abfab-gss-eap-07.txt">TXT</a>).</td></tr>
 <tr><td class="author-text" valign="top"><a name="I-D.ietf-kitten-sasl-openid">[I-D.ietf-kitten-sasl-openid]</a></td>
-<td class="author-text">Lear, E., Tschofenig, H., Mauldin, H., and S. Josefsson, &ldquo;<a href="http://tools.ietf.org/html/draft-ietf-kitten-sasl-openid-02">A SASL &amp; GSS-API Mechanism for OpenID</a>,&rdquo; draft-ietf-kitten-sasl-openid-02 (work in progress), April&nbsp;2011 (<a href="http://www.ietf.org/internet-drafts/draft-ietf-kitten-sasl-openid-02.txt">TXT</a>).</td></tr>
+<td class="author-text">Lear, E., Tschofenig, H., Mauldin, H., and S. Josefsson, &ldquo;<a href="http://tools.ietf.org/html/draft-ietf-kitten-sasl-openid-08">A SASL &amp; GSS-API Mechanism for OpenID</a>,&rdquo; draft-ietf-kitten-sasl-openid-08 (work in progress), February&nbsp;2012 (<a href="http://www.ietf.org/internet-drafts/draft-ietf-kitten-sasl-openid-08.txt">TXT</a>).</td></tr>
 <tr><td class="author-text" valign="top"><a name="I-D.ietf-kitten-sasl-saml">[I-D.ietf-kitten-sasl-saml]</a></td>
-<td class="author-text">Wierenga, K., Lear, E., and S. Josefsson, &ldquo;<a href="http://tools.ietf.org/html/draft-ietf-kitten-sasl-saml-02">A SASL and GSS-API Mechanism for SAML</a>,&rdquo; draft-ietf-kitten-sasl-saml-02 (work in progress), February&nbsp;2011 (<a href="http://www.ietf.org/internet-drafts/draft-ietf-kitten-sasl-saml-02.txt">TXT</a>).</td></tr>
+<td class="author-text">Wierenga, K., Lear, E., and S. Josefsson, &ldquo;<a href="http://tools.ietf.org/html/draft-ietf-kitten-sasl-saml-09">A SASL and GSS-API Mechanism for SAML</a>,&rdquo; draft-ietf-kitten-sasl-saml-09 (work in progress), February&nbsp;2012 (<a href="http://www.ietf.org/internet-drafts/draft-ietf-kitten-sasl-saml-09.txt">TXT</a>, <a href="http://www.ietf.org/internet-drafts/draft-ietf-kitten-sasl-saml-09.pdf">PDF</a>).</td></tr>
 <tr><td class="author-text" valign="top"><a name="RFC2104">[RFC2104]</a></td>
 <td class="author-text"><a href="mailto:hugo@watson.ibm.com">Krawczyk, H.</a>, <a href="mailto:mihir@cs.ucsd.edu">Bellare, M.</a>, and <a href="mailto:canetti@watson.ibm.com">R. Canetti</a>, &ldquo;<a href="http://tools.ietf.org/html/rfc2104">HMAC: Keyed-Hashing for Message Authentication</a>,&rdquo; RFC&nbsp;2104, February&nbsp;1997 (<a href="http://www.rfc-editor.org/rfc/rfc2104.txt">TXT</a>).</td></tr>
 <tr><td class="author-text" valign="top"><a name="RFC4013">[RFC4013]</a></td>

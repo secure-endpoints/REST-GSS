@@ -37,7 +37,7 @@
 ]>
 
 
-<rfc category="std" docName="draft-williams-rest-gss-00" ipr="pre5378Trust200902">
+<rfc category="std" docName="draft-williams-rest-gss-01" ipr="pre5378Trust200902">
   <front>
     <title abbrev="REST-GSS">RESTful Hypertext Transfer Protocol Application-Layer Authentication Using Generic Security Services</title>
 
@@ -49,7 +49,7 @@
       </address>
     </author>
 
-    <date day="6" month="June" year="2011" />
+    <date day="2" month="June" year="2012" />
 
     <area>Security</area>
 
